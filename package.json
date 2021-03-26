@@ -1,10 +1,11 @@
 {
   "name": "relay-nextjs",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Use Relay in your Next.js apps!",
   "main": "index.js",
   "scripts": {
-    "compile": "tsc",
+    "build": "tsc && cp dist/* .",
+    "clean": "rm *.js *.d.ts",
     "format": "prettier --write .",
     "check": "npm run check:prettier",
     "check:prettier": "prettier --check ."
@@ -13,7 +14,7 @@
     "type": "git",
     "url": "git+https://github.com/RevereCRE/relay-nextjs.git"
   },
-  "keywords": [],
+  "keywords": ["relay", "next", "nextjs", "graphql"],
   "author": "Ryan Delaney <rrdelaney@outlook.com>",
   "license": "MIT",
   "bugs": {
@@ -33,5 +34,9 @@
   },
   "dependencies": {
     "serialize-javascript": "^5.0.1"
-  }
+  },
+  "files": [
+    "*.js",
+    "*.d.ts"
+  ]
 }
