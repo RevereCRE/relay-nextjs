@@ -18,6 +18,97 @@ $ npm install relay-nextjs
 `relay-nextjs` must be configured in both a custom `_document` and `_app` to properly
 intercept and handle routing.
 
+### Setting up the Relay Environment
+
+For basic information about the Relay environment please see the [Relay docs](https://relay.dev/docs/getting-started/step-by-step-guide/#42-configure-relay-runtime).
+
+`relay-nextjs` was designed with both client-side and server-side rendering in mind. As such it needs to be able to use either a client-side or server-side Relay environment. The library knows how to handle which environment to use, but we have to tell it how to create these environments. For this we will define two functions: `getClientEnvironment` and `createServerEnvironment`. Note the distinction — on the client only one environment is ever created because there is only one app, but on the server we must create an environment per-render to ensure the cache is not shared between requests.
+
+First let’s define `getClientEnvironment`:
+
+```tsx
+// lib/client_environment.ts
+import { getWiredSerializedState } from 'relay-nextjs';
+import { withHydrateDatetime } from 'relay-nextjs/date';
+import { Environment, Network, Store, RecordSource } from 'relay-runtime';
+
+export function createClientNetwork() {
+  return Network.create(async (params, variables) => {
+    const response = await fetch('/api/graphql', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: params.text,
+        variables,
+      }),
+    });
+
+    const json = await response.text();
+    return JSON.parse(json, withHydrateDatetime);
+  });
+}
+
+let clientEnv: Environment | undefined;
+export function getClientEnvironment() {
+  if (typeof window === 'undefined') return null;
+
+  if (clientSideEnv == null) {
+    clientSideEnv = new Environment({
+      network: createClientNetwork(),
+      store: new Store(new RecordSource(getWiredSerializedState()?.records)),
+      isServer: false,
+    });
+  }
+
+  return clientSideEnv;
+}
+```
+
+and then `createServerEnvironment`:
+
+```tsx
+import { graphql } from 'graphql';
+import { withHydrateDatetime } from 'relay-nextjs/date';
+import { GraphQLResponse, Network } from 'relay-runtime';
+import { schema } from 'schema';
+
+export function createServerNetwork(token: AuthToken) {
+  return Network.create(async (text, variables) => {
+    const context = {
+      token,
+      // More context variables here
+    };
+
+    const results = await graphql({
+      schema,
+      source: text.text!,
+      variableValues: variables,
+      contextValue: context,
+    });
+
+    const data = JSON.parse(
+      JSON.stringify(results),
+      withHydrateDatetime
+    ) as GraphQLResponse;
+
+    return data;
+  });
+}
+
+export function createServerEnvironment(token: AuthToken) {
+  return new Environment({
+    network: createServerNetwork(token),
+    store: new Store(new RecordSource()),
+    isServer: true,
+  });
+}
+```
+
+Note in the example server environment we’re executing against a local schema but you may fetch from a remote API as well. 
+
 ### Configuring `_document`
 
 ```tsx
@@ -65,21 +156,23 @@ class MyDocument extends Document<MyDocumentProps> {
 
 ```tsx
 // pages/_app.tsx
+import { RelayEnvironmentProvider } from 'react-relay/hooks';
 import { getInitialPreloadedQuery, getRelayProps } from 'relay-nextjs/app';
+import { getClientEnvironment } from ‘../lib/client_environment‘;
 
-const clientSideEnv = getClientSideEnvironment();
+const clientEnv = getClientEnvironment();
 const initialPreloadedQuery = getInitialPreloadedQuery({
-  createClientEnvironment: () => getClientSideEnvironment()!,
+  createClientEnvironment: () => getClientEnvironment()!,
 });
 
 function MyApp({ Component, pageProps }: AppProps) {
   const relayProps = getRelayProps(pageProps, initialPreloadedQuery);
-  const env = relayProps.preloadedQuery?.environment ?? clientSideEnv!;
+  const env = relayProps.preloadedQuery?.environment ?? clientEnv!;
 
   return (
     <>
       <RelayEnvironmentProvider environment={env}>
-        <Component {...pageProps} {...wiredProps} />
+        <Component {...pageProps} {...relayProps} />
       </RelayEnvironmentProvider>
     </>
   );
@@ -119,14 +212,14 @@ function Loading() {
   return <div>Loading...</div>;
 }
 
-export default Wire(UserProfile, UserProfileQuery, {
+export default withRelay(UserProfile, UserProfileQuery, {
   // This property is optional.
   error: MyCustomErrorComponent,
   // Fallback to render while the page is loading.
   fallback: <Loading />,
   // Create a Relay environment on the client-side.
   // Note: This function must always return the same value.
-  createClientEnvironment: () => getClientSideEnvironment()!,
+  createClientEnvironment: () => getClientEnvironment()!,
   // Gets server side props for the page.
   serverSideProps: async (ctx) => {
     const { getTokenFromCtx } = await import('lib/server/auth');
@@ -145,15 +238,11 @@ export default Wire(UserProfile, UserProfileQuery, {
     ctx,
     { token }: { token: TokenWithClaims }
   ) => {
-    const { createServerNetwork } = await import(
-      'lib/server/relay_server_network'
+    const { createServerEnvironment } = await import(
+      '../../../lib/server_environment'
     );
 
-    return new Environment({
-      network: createServerNetwork(token),
-      store: new Store(new RecordSource()),
-      isServer: true,
-    });
+    return createServerEnvironment(token);
   },
 });
 ```
