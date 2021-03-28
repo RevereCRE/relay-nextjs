@@ -1,0 +1,49 @@
+/** @type {import('@docusaurus/types').DocusaurusConfig} */
+module.exports = {
+  title: 'relay-nextjs',
+  tagline: 'Use Relay with Next.js apps!',
+  url: 'https://reverecre.github.io/relay-nextjs',
+  baseUrl: '/relay-nextjs/',
+  onBrokenLinks: 'throw',
+  onBrokenMarkdownLinks: 'warn',
+  favicon: 'img/favicon.ico',
+  organizationName: 'RevereCRE', // Usually your GitHub org/user name.
+  projectName: 'relay-nextjs', // Usually your repo name.
+  themeConfig: {
+    navbar: {
+      title: 'relay-nextjs',
+      items: [
+        {
+          to: 'docs/',
+          activeBasePath: 'docs',
+          label: 'Docs',
+          position: 'left',
+        },
+        {
+          href: 'https://github.com/RevereCRE/relay-nextjs',
+          label: 'GitHub',
+          position: 'right',
+        },
+      ],
+    },
+    footer: {
+      copyright: `Copyright © ${new Date().getFullYear()} Revere CRE, Inc. Built with Docusaurus.`,
+    },
+  },
+  presets: [
+    [
+      '@docusaurus/preset-classic',
+      {
+        docs: {
+          sidebarPath: require.resolve('./sidebars.js'),
+          // Please change this to your repo.
+          editUrl:
+            'https://github.com/RevereCRE/relay-nextjs/edit/master/website/',
+        },
+        theme: {
+          customCss: require.resolve('./src/css/custom.css'),
+        },
+      },
+    ],
+  ],
+};
