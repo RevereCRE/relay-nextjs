@@ -55,15 +55,15 @@ let clientEnv: Environment | undefined;
 export function getClientEnvironment() {
   if (typeof window === 'undefined') return null;
 
-  if (clientSideEnv == null) {
-    clientSideEnv = new Environment({
+  if (clientEnv == null) {
+    clientEnv = new Environment({
       network: createClientNetwork(),
       store: new Store(new RecordSource(getWiredSerializedState()?.records)),
       isServer: false,
     });
   }
 
-  return clientSideEnv;
+  return clientEnv;
 }
 ```
 
