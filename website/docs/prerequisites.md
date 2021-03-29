@@ -1,6 +1,5 @@
 ---
 title: Prerequisites
-slug: /
 ---
 
 First check out the [Relay docs](https://relay.dev) and the [Relay prerequisites](https://relay.dev/docs/getting-started/prerequisites/).

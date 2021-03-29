@@ -1,7 +1,7 @@
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
 module.exports = {
   title: 'relay-nextjs',
-  tagline: 'Use Relay with Next.js apps!',
+  tagline: 'Relay Hooks integration for Next.js apps',
   url: 'https://reverecre.github.io/relay-nextjs',
   baseUrl: '/relay-nextjs/',
   onBrokenLinks: 'throw',
@@ -36,7 +36,6 @@ module.exports = {
       {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
-          // Please change this to your repo.
           editUrl:
             'https://github.com/RevereCRE/relay-nextjs/edit/master/website/',
         },

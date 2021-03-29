@@ -3,7 +3,12 @@ module.exports = {
     {
       type: 'category',
       label: 'Getting Started',
-      items: ['prerequisites', 'installation-and-setup', 'configuration'],
+      items: [
+        'what-why',
+        'prerequisites',
+        'installation-and-setup',
+        'configuration',
+      ],
     },
   ],
 };
