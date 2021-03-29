@@ -13,8 +13,8 @@ const features = [
     description: (
       <>
         <code>relay-nextjs</code> was designed with Next.js in mind from the
-        start. Perfectly integrated, no need to change pages not useing Relay.
-        100% backwards compatible.
+        start. Perfectly integrated with Relay Hooks and no need to change pages
+        not using it. 100% backwards compatible.
       </>
     ),
   },
@@ -25,8 +25,8 @@ const features = [
       <>
         Next.js speeds your page loads up using server-side rendering but
         subsequent navigations require a server-round trip.{' '}
-        <code>relay-nextjs</code> speeds up client-side navigation with all the
-        performance of SSR.
+        <code>relay-nextjs</code> keeps client-side navigation snappy with all
+        the performance of SSR.
       </>
     ),
   },
@@ -36,7 +36,8 @@ const features = [
     description: (
       <>
         <code>relay-nextjs</code> uses React Suspense under the hood to
-        orchestrate loading states across the page.
+        orchestrate loading states across the page. Don't worry — we only use
+        publicly documented API's so you won't be stranded in two years.
       </>
     ),
   },
@@ -61,10 +62,7 @@ export default function Home() {
   const context = useDocusaurusContext();
   const { siteConfig = {} } = context;
   return (
-    <Layout
-      title={`Hello from ${siteConfig.title}`}
-      description="Description will go into a meta tag in <head />"
-    >
+    <Layout title={`Relay for Next.js`}>
       <header className={clsx('hero hero--primary', styles.heroBanner)}>
         <div className="container">
           <h1 className="hero__title">{siteConfig.title}</h1>

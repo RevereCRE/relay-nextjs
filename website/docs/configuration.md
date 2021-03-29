@@ -108,7 +108,7 @@ Note in the example server environment we’re executing against a local schema 
 ### Configuring `_document`
 
 ```tsx
-// pages/_document.tsx
+// src/pages/_document.tsx
 import { createRelayDocument, RelayDocument } from 'relay-nextjs/document';
 
 interface DocumentProps {
@@ -151,7 +151,7 @@ class MyDocument extends Document<MyDocumentProps> {
 ### Configuring `_app`
 
 ```tsx
-// pages/_app.tsx
+// src/pages/_app.tsx
 import { RelayEnvironmentProvider } from 'react-relay/hooks';
 import { getInitialPreloadedQuery, getRelayProps } from 'relay-nextjs/app';
 import { getClientEnvironment } from '../lib/client_environment';
@@ -180,8 +180,8 @@ export default MyApp;
 ## Usage in a Page
 
 ```tsx
-// pages/user/[uuid].tsx
-import { withRelay, RelayProps } from 'lib/shared/wired';
+// src/pages/user/[uuid].tsx
+import { withRelay, RelayProps } from 'relay-nextjs';
 
 // The $uuid variable is injected automatically from the route.
 const ProfileQuery = graphql`
@@ -212,6 +212,7 @@ export default withRelay(UserProfile, UserProfileQuery, {
   // This property is optional.
   error: MyCustomErrorComponent,
   // Fallback to render while the page is loading.
+  // This property is optional.
   fallback: <Loading />,
   // Create a Relay environment on the client-side.
   // Note: This function must always return the same value.
@@ -234,10 +235,7 @@ export default withRelay(UserProfile, UserProfileQuery, {
     ctx,
     { token }: { token: TokenWithClaims }
   ) => {
-    const { createServerEnvironment } = await import(
-      '../../../lib/server_environment'
-    );
-
+    const { createServerEnvironment } = await import('lib/server_environment');
     return createServerEnvironment(token);
   },
 });
