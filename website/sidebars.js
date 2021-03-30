@@ -10,5 +10,10 @@ module.exports = {
         'configuration',
       ],
     },
+    {
+      type: 'category',
+      label: 'Guides',
+      items: ['lazy-loaded-query'],
+    },
   ],
 };
