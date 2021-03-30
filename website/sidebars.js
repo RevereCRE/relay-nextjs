@@ -15,5 +15,10 @@ module.exports = {
       label: 'Guides',
       items: ['lazy-loaded-query'],
     },
+    {
+      type: 'category',
+      label: 'API Reference',
+      items: ['page-api', 'document-api', 'app-api'],
+    },
   ],
 };

@@ -121,9 +121,9 @@ class MyDocument extends Document<MyDocumentProps> {
 
     const renderPage = ctx.renderPage;
     ctx.renderPage = () =>
-    renderPage({
-      enhanceApp: (App) => relayDocument.enhance(App),
-    });
+      renderPage({
+        enhanceApp: (App) => relayDocument.enhance(App),
+      });
 
     const initialProps = await Document.getInitialProps(ctx);
 
@@ -146,6 +146,7 @@ class MyDocument extends Document<MyDocumentProps> {
       </Html>
     );
   }
+}
 ```
 
 ### Configuring `_app`
@@ -182,6 +183,7 @@ export default MyApp;
 ```tsx
 // src/pages/user/[uuid].tsx
 import { withRelay, RelayProps } from 'relay-nextjs';
+import { graphql, usePreloadedQuery } from 'react-relay/hooks';
 
 // The $uuid variable is injected automatically from the route.
 const ProfileQuery = graphql`
