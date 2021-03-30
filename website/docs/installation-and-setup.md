@@ -71,7 +71,7 @@ Then configure Babel to compile away `graphql` strings:
 }
 ```
 
-`relay-nextjs` is designed to run on botht the server and client. To avoid pulling in server
+`relay-nextjs` is designed to run on both the server and client. To avoid pulling in server
 dependencies to the client bundle configure Webpack to ignore any files in `src/lib/server`.
 In `next.config.js`:
 
@@ -82,6 +82,9 @@ module.exports = {
       // Ensures no server modules are included on the client.
       config.plugins.push(new webpack.IgnorePlugin(/lib\/server/));
     }
+
+    return config;
+  },
 };
 ```
 

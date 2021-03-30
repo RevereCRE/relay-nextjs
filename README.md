@@ -28,7 +28,7 @@ First let’s define `getClientEnvironment`:
 
 ```tsx
 // lib/client_environment.ts
-import { getWiredSerializedState } from 'relay-nextjs';
+import { getRleaySerializedState } from 'relay-nextjs';
 import { withHydrateDatetime } from 'relay-nextjs/date';
 import { Environment, Network, Store, RecordSource } from 'relay-runtime';
 
@@ -58,7 +58,7 @@ export function getClientEnvironment() {
   if (clientEnv == null) {
     clientEnv = new Environment({
       network: createClientNetwork(),
-      store: new Store(new RecordSource(getWiredSerializedState()?.records)),
+      store: new Store(new RecordSource(getRleaySerializedState()?.records)),
       isServer: false,
     });
   }
@@ -75,7 +75,7 @@ import { withHydrateDatetime } from 'relay-nextjs/date';
 import { GraphQLResponse, Network } from 'relay-runtime';
 import { schema } from 'schema';
 
-export function createServerNetwork(token: AuthToken) {
+export function createServerNetwork() {
   return Network.create(async (text, variables) => {
     const context = {
       token,
@@ -98,16 +98,16 @@ export function createServerNetwork(token: AuthToken) {
   });
 }
 
-export function createServerEnvironment(token: AuthToken) {
+export function createServerEnvironment() {
   return new Environment({
-    network: createServerNetwork(token),
+    network: createServerNetwork(),
     store: new Store(new RecordSource()),
     isServer: true,
   });
 }
 ```
 
-Note in the example server environment we’re executing against a local schema but you may fetch from a remote API as well. 
+Note in the example server environment we’re executing against a local schema but you may fetch from a remote API as well.
 
 ### Configuring `_document`
 
@@ -185,7 +185,7 @@ export default MyApp;
 
 ```tsx
 // pages/user/[uuid].tsx
-import { withRelay, RelayProps } from 'lib/shared/wired';
+import { withRelay, RelayProps } from 'relay-nextjs';
 
 // The $uuid variable is injected automatically from the route.
 const ProfileQuery = graphql`

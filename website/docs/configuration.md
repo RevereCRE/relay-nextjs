@@ -24,7 +24,7 @@ First let’s define `getClientEnvironment`:
 
 ```tsx
 // lib/client_environment.ts
-import { getWiredSerializedState } from 'relay-nextjs';
+import { getRelaySerializedState } from 'relay-nextjs';
 import { withHydrateDatetime } from 'relay-nextjs/date';
 import { Environment, Network, Store, RecordSource } from 'relay-runtime';
 
@@ -54,7 +54,7 @@ export function getClientEnvironment() {
   if (clientEnv == null) {
     clientEnv = new Environment({
       network: createClientNetwork(),
-      store: new Store(new RecordSource(getWiredSerializedState()?.records)),
+      store: new Store(new RecordSource(getRelaySerializedState()?.records)),
       isServer: false,
     });
   }
@@ -71,11 +71,10 @@ import { withHydrateDatetime } from 'relay-nextjs/date';
 import { GraphQLResponse, Network } from 'relay-runtime';
 import { schema } from 'schema';
 
-export function createServerNetwork(token: AuthToken) {
+export function createServerNetwork() {
   return Network.create(async (text, variables) => {
     const context = {
-      token,
-      // More context variables here
+      // If this function accepts an auth token you may add it here.
     };
 
     const results = await graphql({
@@ -94,9 +93,10 @@ export function createServerNetwork(token: AuthToken) {
   });
 }
 
-export function createServerEnvironment(token: AuthToken) {
+// Optional: this function can take a token used for authentication and pass it into `createServerNetwork`.
+export function createServerEnvironment() {
   return new Environment({
-    network: createServerNetwork(token),
+    network: createServerNetwork(),
     store: new Store(new RecordSource()),
     isServer: true,
   });
@@ -219,6 +219,9 @@ export default withRelay(UserProfile, UserProfileQuery, {
   createClientEnvironment: () => getClientEnvironment()!,
   // Gets server side props for the page.
   serverSideProps: async (ctx) => {
+    // This is an example of getting an auth token from the request context.
+    // If you don't need to authenticate users this can be removed and return an
+    // empty object instead.
     const { getTokenFromCtx } = await import('lib/server/auth');
     const token = await getTokenFromCtx(ctx);
     if (token == null) {
@@ -233,7 +236,9 @@ export default withRelay(UserProfile, UserProfileQuery, {
   // to this function.
   createServerEnvironment: async (
     ctx,
-    { token }: { token: TokenWithClaims }
+    // The object returned from serverSideProps. If you don't need a token
+    // you can remove this argument.
+    { token }: { token: string }
   ) => {
     const { createServerEnvironment } = await import('lib/server_environment');
     return createServerEnvironment(token);
