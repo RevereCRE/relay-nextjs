@@ -37,7 +37,7 @@ const features = [
       <>
         <code>relay-nextjs</code> uses React Suspense under the hood to
         orchestrate loading states across the page. Don't worry — we only use
-        publicly documented API's so you won't be stranded in two years.
+        publicly documented APIs so you won't be stranded in two years.
       </>
     ),
   },

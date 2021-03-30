@@ -14,6 +14,6 @@ Basically we wrote the glue code for you!
 This library has several goals:
 
 - Use Relay with no modifications, be able to copy code exactly as is from the docs
-- Use only documented public API's of React, Relay, and Next.js to prevent lock-in
+- Use only documented public APIs of React, Relay, and Next.js to prevent lock-in
 - Does not require modifications to pages not using Relay
 - Incremental adoption across your app
