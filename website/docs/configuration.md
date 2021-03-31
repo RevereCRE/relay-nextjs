@@ -69,20 +69,16 @@ and then `createServerEnvironment`:
 import { graphql } from 'graphql';
 import { withHydrateDatetime } from 'relay-nextjs/date';
 import { GraphQLResponse, Network } from 'relay-runtime';
-import schema from 'schema.graphql';
+
+// Relay is not prescriptive about how GraphQL requests are made.
+// This is an example showing how to request GraphQL data.
+// You should fill this in with how to make requests to your GraphQL
+// API of choice.
+import { makeGraphQLRequest } from './my_graphql_api';
 
 export function createServerNetwork() {
   return Network.create(async (text, variables) => {
-    const context = {
-      // If this function accepts an auth token you may add it here.
-    };
-
-    const results = await graphql({
-      schema,
-      source: text.text!,
-      variableValues: variables,
-      contextValue: context,
-    });
+    const results = await makeGraphQLRequest(text, variables);
 
     const data = JSON.parse(
       JSON.stringify(results),
@@ -110,11 +106,7 @@ Note in the example server environment we’re executing against a local schema 
 ```tsx
 // src/pages/_document.tsx
 import { createRelayDocument, RelayDocument } from 'relay-nextjs/document';
-import NextDocument, {
-  Html,
-  Head,
-  DocumentContext,
-} from "next/document";
+import NextDocument, { Html, Head, DocumentContext } from 'next/document';
 
 interface DocumentProps {
   relayDocument: RelayDocument;
@@ -201,7 +193,7 @@ const ProfileQuery = graphql`
   }
 `;
 
-function Profile({ preloadedQuery }: RelayProps<{}, profile_ProfileQuery>) {
+function UserProfile({ preloadedQuery }: RelayProps<{}, profile_ProfileQuery>) {
   const query = usePreloadedQuery(ProfileQuery, preloadedQuery);
 
   return (
