@@ -69,7 +69,7 @@ and then `createServerEnvironment`:
 import { graphql } from 'graphql';
 import { withHydrateDatetime } from 'relay-nextjs/date';
 import { GraphQLResponse, Network } from 'relay-runtime';
-import { schema } from 'schema';
+import schema from 'schema.graphql';
 
 export function createServerNetwork() {
   return Network.create(async (text, variables) => {
@@ -110,12 +110,17 @@ Note in the example server environment we’re executing against a local schema 
 ```tsx
 // src/pages/_document.tsx
 import { createRelayDocument, RelayDocument } from 'relay-nextjs/document';
+import NextDocument, {
+  Html,
+  Head,
+  DocumentContext,
+} from "next/document";
 
 interface DocumentProps {
   relayDocument: RelayDocument;
 }
 
-class MyDocument extends Document<MyDocumentProps> {
+class MyDocument extends NextDocument<DocumentProps> {
   static async getInitialProps(ctx: DocumentContext) {
     const relayDocument = createRelayDocument();
 
