@@ -23,7 +23,7 @@ const ProfileQuery = graphql`
   }
 `;
 
-function Profile({ preloadedQuery }: RelayProps<{}, profile_ProfileQuery>) {
+function UserProfile({ preloadedQuery }: RelayProps<{}, profile_ProfileQuery>) {
   const query = usePreloadedQuery(ProfileQuery, preloadedQuery);
 
   return (
