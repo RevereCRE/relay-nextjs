@@ -1,0 +1,5 @@
+.next
+data
+node_modules
+**/__generated__
+public/
