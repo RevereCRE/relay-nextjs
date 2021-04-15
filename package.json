@@ -4,8 +4,8 @@
   "description": "Use Relay in your Next.js apps!",
   "main": "index.js",
   "scripts": {
-    "build": "tsc && cp dist/* .",
-    "clean": "rm *.js *.d.ts",
+    "build": "tsc && cp -r dist/* .",
+    "clean": "rm *.js *.d.ts && rm -rf wired",
     "format": "prettier --write .",
     "check": "npm run check:prettier",
     "check:prettier": "prettier --check ."
