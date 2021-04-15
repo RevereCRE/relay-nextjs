@@ -1,6 +1,6 @@
 {
   "name": "relay-nextjs",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Use Relay in your Next.js apps!",
   "main": "index.js",
   "scripts": {
