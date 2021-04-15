@@ -1,9 +1,10 @@
+import type { ParsedUrlQuery } from 'querystring';
 import type { GraphQLTaggedNode, RecordSource } from 'relay-runtime';
 
 export interface WiredSerializedState {
   records: ReturnType<RecordSource['toJSON']>;
   query: GraphQLTaggedNode;
-  variables: Record<string, unknown>;
+  variables: ParsedUrlQuery;
 }
 
 interface WiredWindow {

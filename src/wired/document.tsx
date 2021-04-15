@@ -1,5 +1,5 @@
 import type { DocumentContext } from 'next/document';
-import { ComponentType } from 'react';
+import React, { ComponentType } from 'react';
 import serialize from 'serialize-javascript';
 import { getWiredServerContext, WiredServerContext } from './context';
 import { WiredSerializedState } from './serialized_state';
@@ -11,12 +11,12 @@ type WithoutFunction<T> = T extends (c: infer C) => unknown ? never : T;
 type RenderPageOptions = WithoutFunction<RenderPageParam>;
 type AppEnhancer = NonNullable<RenderPageOptions['enhanceApp']>;
 
-interface WiredDocument {
+export interface WiredDocument {
   enhance: AppEnhancer;
   Script: ComponentType;
 }
 
-function createWiredDocument(): WiredDocument {
+export function createWiredDocument(): WiredDocument {
   let capturedWiredContext: WiredServerContext | undefined;
 
   const enhance: WiredDocument['enhance'] = (App) => {
@@ -54,6 +54,3 @@ function createWiredDocument(): WiredDocument {
 
   return { enhance, Script };
 }
-
-export type { WiredDocument as RelayDocument };
-export { createWiredDocument as createRelayDocument };

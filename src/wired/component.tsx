@@ -1,6 +1,7 @@
 import { GraphQLFormattedError } from 'graphql';
 import type { NextPageContext, Redirect } from 'next';
 import NextError, { ErrorProps } from 'next/error';
+import Router from 'next/router';
 import React, { ComponentType, ReactNode, Suspense } from 'react';
 import { loadQuery, PreloadedQuery } from 'react-relay/hooks';
 import type {
@@ -21,6 +22,8 @@ export interface WiredOptions<ServerSideProps = {}> {
   fallback?: ReactNode;
 
   createClientEnvironment: () => Environment;
+
+  clientSideProps?: (ctx: NextPageContext) => void | { redirect: Redirect };
 
   createServerEnvironment: (
     ctx: NextPageContext,
@@ -151,6 +154,15 @@ function getClientInitialProps<ServerSideProps>(
   query: GraphQLTaggedNode,
   opts: WiredOptions<ServerSideProps>
 ) {
+  const clientSideProps = opts.clientSideProps
+    ? opts.clientSideProps(ctx)
+    : undefined;
+
+  if (clientSideProps != null && 'redirect' in clientSideProps) {
+    Router.push(clientSideProps.redirect.destination);
+    return {};
+  }
+
   const env = opts.createClientEnvironment();
   const variables = ctx.query;
   const preloadedQuery = loadQuery(env, query, variables, {

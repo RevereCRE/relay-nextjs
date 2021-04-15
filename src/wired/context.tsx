@@ -1,3 +1,4 @@
+import type { ParsedUrlQuery } from 'querystring';
 import type { GraphQLTaggedNode } from 'react-relay';
 import { AnyPreloadedQuery } from './types';
 
@@ -6,7 +7,7 @@ const WIRED_CONTEXT = Symbol('WIRED');
 export interface WiredServerContext {
   query: GraphQLTaggedNode;
   preloadedQuery: AnyPreloadedQuery;
-  variables: Record<string, unknown>;
+  variables: ParsedUrlQuery;
 }
 
 export function createWiredServerContext(value: WiredServerContext) {

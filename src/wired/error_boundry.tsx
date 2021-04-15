@@ -1,5 +1,5 @@
 import Error from 'next/error';
-import { Component, PropsWithChildren } from 'react';
+import React, { Component, PropsWithChildren } from 'react';
 
 type WiredErrorBoundryProps = PropsWithChildren<unknown>;
 
