@@ -170,7 +170,8 @@ function getClientInitialProps<ServerSideProps>(
   }
 
   const env = opts.createClientEnvironment();
-  const variables = ctx.query;
+  const queryVariables = opts.queryVariables ? opts.queryVariables(ctx) : {};
+  const variables = { ...ctx.query, ...queryVariables };
   const preloadedQuery = loadQuery(env, query, variables, {
     fetchPolicy: 'store-and-network',
   });
