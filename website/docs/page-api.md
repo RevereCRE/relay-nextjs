@@ -14,8 +14,8 @@ import { graphql, usePreloadedQuery } from 'react-relay/hooks';
 
 // The $uuid variable is injected automatically from the route.
 const ProfileQuery = graphql`
-  query profile_ProfileQuery($uuid: ID!) {
-    user(id: $uuid) {
+  query profile_ProfileQuery($uuid: ID!, $active: Boolean) {
+    user(id: $uuid, active: $active) {
       id
       firstName
       lastName
@@ -67,6 +67,9 @@ const options: RelayOptions<{ token: string }> = {
     const { createServerEnvironment } = await import('lib/server_environment');
     return createServerEnvironment(token);
   },
+  queryVariables: (ctx) => ({
+    active: true,
+  }),
 };
 ```
 
@@ -81,6 +84,8 @@ const options: RelayOptions<{ token: string }> = {
   you should import server-only deps with `await import('...')`.
 - `createServerEnvironment`: A function that returns a `RelayEnvironment`. First argument
   is `NextPageContext` and the second is the object returned by `serverSideProps`.
+- `queryVariables`: Pass any variables into the query. Variables defined here will have precedence
+  over variables injected from the route
 
 ## `getRelaySerializedState`
 
