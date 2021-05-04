@@ -35,7 +35,7 @@ export interface WiredOptions<ServerSideProps = {}> {
   ) => Promise<ServerSideProps | { redirect: Redirect }>;
 
   //TODO: Incomplete, can we infer query variables type here?
-  queryVariables: (ctx: NextPageContext) => { [key: string]: any };
+  queryVariables?: (ctx: NextPageContext) => { [key: string]: any };
 }
 
 export type WiredProps<
@@ -113,7 +113,7 @@ async function getServerInitialProps<ServerSideProps>(
   }
 
   const env = await opts.createServerEnvironment(ctx, serverSideProps);
-  const variables = opts.queryVariables(ctx);
+  const variables = opts.queryVariables ? opts.queryVariables(ctx) : {};
   const preloadedQuery = loadQuery(env, query, {
     ...ctx.query,
     ...variables,
