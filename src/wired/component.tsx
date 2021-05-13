@@ -23,7 +23,14 @@ export interface WiredOptions<ServerSideProps = {}> {
 
   createClientEnvironment: () => Environment;
 
-  clientSideProps?: (ctx: NextPageContext) => void | { redirect: Redirect };
+  clientSideProps?: (
+    ctx: NextPageContext
+  ) => ServerSideProps | { redirect: Redirect };
+
+  clientSideQueryVariables?: (
+    ctx: NextPageContext,
+    props: ServerSideProps
+  ) => { [key: string]: any }; // TODO: Incomplete, can we infer query variables type here?
 
   createServerEnvironment: (
     ctx: NextPageContext,
@@ -34,8 +41,10 @@ export interface WiredOptions<ServerSideProps = {}> {
     ctx: NextPageContext
   ) => Promise<ServerSideProps | { redirect: Redirect }>;
 
-  //TODO: Incomplete, can we infer query variables type here?
-  queryVariables?: (ctx: NextPageContext) => { [key: string]: any };
+  serverSideQueryVariables?: (
+    ctx: NextPageContext,
+    props: ServerSideProps
+  ) => { [key: string]: any }; // TODO: Incomplete, can we infer query variables type here?
 }
 
 export type WiredProps<
@@ -113,7 +122,9 @@ async function getServerInitialProps<ServerSideProps>(
   }
 
   const env = await opts.createServerEnvironment(ctx, serverSideProps);
-  const variables = opts.queryVariables ? opts.queryVariables(ctx) : {};
+  const variables = opts.serverSideQueryVariables
+    ? opts.serverSideQueryVariables(ctx, serverSideProps)
+    : {};
   const preloadedQuery = loadQuery(env, query, {
     ...ctx.query,
     ...variables,
@@ -162,7 +173,7 @@ function getClientInitialProps<ServerSideProps>(
 ) {
   const clientSideProps = opts.clientSideProps
     ? opts.clientSideProps(ctx)
-    : undefined;
+    : ({} as ServerSideProps);
 
   if (clientSideProps != null && 'redirect' in clientSideProps) {
     Router.push(clientSideProps.redirect.destination);
@@ -170,7 +181,9 @@ function getClientInitialProps<ServerSideProps>(
   }
 
   const env = opts.createClientEnvironment();
-  const queryVariables = opts.queryVariables ? opts.queryVariables(ctx) : {};
+  const queryVariables = opts.clientSideQueryVariables
+    ? opts.clientSideQueryVariables(ctx, clientSideProps)
+    : {};
   const variables = { ...ctx.query, ...queryVariables };
   const preloadedQuery = loadQuery(env, query, variables, {
     fetchPolicy: 'store-and-network',
