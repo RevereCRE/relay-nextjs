@@ -84,8 +84,10 @@ const options: RelayOptions<{ token: string }> = {
   you should import server-only deps with `await import('...')`.
 - `createServerEnvironment`: A function that returns a `RelayEnvironment`. First argument
   is `NextPageContext` and the second is the object returned by `serverSideProps`.
-- `queryVariables`: Pass any variables into the query. Variables defined here will have precedence
-  over variables injected from the route
+- `clientSideQueryVariables`: Pass any variables into the query. Variables defined here will have precedence
+  over variables injected from the route.
+- `serverSideQueryVariables`: Same as above but this function will run on the server.
+  Both functions should return same result.
 
 ## `getRelaySerializedState`
 
