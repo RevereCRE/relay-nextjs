@@ -1,21 +1,15 @@
 import type { AppProps } from 'next/app';
 import type { Environment } from 'react-relay';
 import { loadQuery } from 'react-relay/hooks';
-import { WiredProps } from './component';
-import {
-  getWiredClientContext,
-  getWiredErrorContext,
-  getWiredServerContext,
-} from './context';
+import type { WiredProps } from './component';
+import { getWiredClientContext, getWiredServerContext } from './context';
 import { getWiredSerializedState } from './serialized_state';
-import { AnyPreloadedQuery } from './types';
+import type { AnyPreloadedQuery } from './types';
 
 export function getWiredProps(
   pageProps: AppProps['pageProps'],
   initialPreloadedQuery: AnyPreloadedQuery | null
 ): Partial<WiredProps> {
-  const errorContext = getWiredErrorContext(pageProps.__wired_error_context);
-
   const serverContext = getWiredServerContext(
     pageProps.__wired__server__context
   );
@@ -24,15 +18,13 @@ export function getWiredProps(
     pageProps.__wired__client__context
   );
 
-  const statusCode = errorContext?.statusCode ?? 200;
-  const err = errorContext?.err;
   const CSN = clientContext != null;
   const preloadedQuery =
     clientContext?.preloadedQuery ??
     serverContext?.preloadedQuery ??
     initialPreloadedQuery!;
 
-  return { CSN, statusCode, preloadedQuery, err };
+  return { CSN, preloadedQuery };
 }
 
 export function getInitialPreloadedQuery(opts: {

@@ -1,24 +1,22 @@
-import { GraphQLFormattedError } from 'graphql';
 import type { NextPageContext, Redirect } from 'next';
-import NextError, { ErrorProps } from 'next/error';
 import Router from 'next/router';
 import React, { ComponentType, ReactNode, Suspense } from 'react';
 import { loadQuery, PreloadedQuery } from 'react-relay/hooks';
-import type {
+import {
   Environment,
   GraphQLTaggedNode,
   OperationType,
+  RelayFeatureFlags,
 } from 'relay-runtime';
-import {
-  createWiredClientContext,
-  createWiredErrorContext,
-  createWiredServerContext,
-} from './context';
+import { createWiredClientContext, createWiredServerContext } from './context';
 import { WiredErrorBoundry } from './error_boundry';
-import { AnyPreloadedQuery } from './types';
+import type { AnyPreloadedQuery } from './types';
+
+// Enabling this feature flag to determine if a page should 404 on the server.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(RelayFeatureFlags as any).ENABLE_REQUIRED_DIRECTIVES = true;
 
 export interface WiredOptions<ServerSideProps = {}> {
-  error?: React.ComponentType<ErrorProps & { err?: unknown }>;
   fallback?: ReactNode;
 
   createClientEnvironment: () => Environment;
@@ -40,8 +38,6 @@ export type WiredProps<
   Q extends OperationType = OperationType
 > = P & {
   CSN: boolean;
-  err?: unknown;
-  statusCode: number;
   preloadedQuery: PreloadedQuery<Q>;
 };
 
@@ -51,15 +47,7 @@ export function Wire<Props extends WiredProps, ServerSideProps>(
   opts: WiredOptions<ServerSideProps>
 ) {
   function WiredComponent(props: Props) {
-    const isError =
-      props.err != null ||
-      `${props.statusCode}`.startsWith('4') ||
-      `${props.statusCode}`.startsWith('5');
-
-    if (isError) {
-      const ErrorComponent = opts.error ?? NextError;
-      return <ErrorComponent err={props.err} statusCode={props.statusCode} />;
-    } else if (props.CSN) {
+    if (props.CSN) {
       return (
         <WiredErrorBoundry>
           <Suspense fallback={opts.fallback ?? 'Loading...'}>
@@ -113,29 +101,7 @@ async function getServerInitialProps<ServerSideProps>(
   const variables = ctx.query;
   const preloadedQuery = loadQuery(env, query, variables);
 
-  try {
-    await ensureQueryFlushed(preloadedQuery);
-  } catch (e) {
-    if (e.source?.errors != null) {
-      const graphqlErrors = e.source.errors as GraphQLFormattedError[];
-      const isNotFound = graphqlErrors.some((e) =>
-        e.message.startsWith('Cannot return null for non-nullable field')
-      );
-
-      if (isNotFound) {
-        ctx.res!.statusCode = 404;
-
-        const context = createWiredErrorContext({
-          statusCode: 404,
-          err: e.source.errors,
-        });
-
-        return { __wired_error_context: context };
-      }
-    }
-
-    throw e;
-  }
+  await ensureQueryFlushed(preloadedQuery);
 
   const context = createWiredServerContext({
     variables,

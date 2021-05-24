@@ -1,6 +1,6 @@
 import type { ParsedUrlQuery } from 'querystring';
 import type { GraphQLTaggedNode } from 'react-relay';
-import { AnyPreloadedQuery } from './types';
+import type { AnyPreloadedQuery } from './types';
 
 const WIRED_CONTEXT = Symbol('WIRED');
 
@@ -55,23 +55,4 @@ export function getWiredClientContext(
 export interface WiredErrorContext {
   statusCode: number;
   err?: unknown;
-}
-
-export function createWiredErrorContext(value: WiredErrorContext) {
-  const context = {};
-  Object.defineProperty(context, 'WIRED_CONTEXT', {
-    enumerable: true,
-    value: value,
-  });
-
-  return context;
-}
-
-export function getWiredErrorContext(
-  // Wired context values can be attached to any type.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  context: any
-): WiredErrorContext | undefined {
-  if (context == null) return undefined;
-  return context['WIRED_CONTEXT'];
 }

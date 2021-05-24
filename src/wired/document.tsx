@@ -2,7 +2,7 @@ import type { DocumentContext } from 'next/document';
 import React, { ComponentType } from 'react';
 import serialize from 'serialize-javascript';
 import { getWiredServerContext, WiredServerContext } from './context';
-import { WiredSerializedState } from './serialized_state';
+import type { WiredSerializedState } from './serialized_state';
 
 // This is all to get the type of `enhanceApp` because it not exported by Next.
 type RenderPage = DocumentContext['renderPage'];

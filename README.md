@@ -28,7 +28,7 @@ First let’s define `getClientEnvironment`:
 
 ```tsx
 // lib/client_environment.ts
-import { getRleaySerializedState } from 'relay-nextjs';
+import { getRelaySerializedState } from 'relay-nextjs';
 import { withHydrateDatetime } from 'relay-nextjs/date';
 import { Environment, Network, Store, RecordSource } from 'relay-runtime';
 
@@ -214,8 +214,6 @@ function Loading() {
 }
 
 export default withRelay(UserProfile, UserProfileQuery, {
-  // This property is optional.
-  error: MyCustomErrorComponent,
   // Fallback to render while the page is loading.
   // This property is optional.
   fallback: <Loading />,

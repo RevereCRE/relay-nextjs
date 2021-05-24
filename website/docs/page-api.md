@@ -49,7 +49,6 @@ Interface for configuring `withRelay`. Example usage:
 
 ```tsx
 const options: RelayOptions<{ token: string }> = {
-  error: MyCustomErrorComponent,
   fallback: <Loading />,
   createClientEnvironment: () => getClientEnvironment()!,
   serverSideProps: async (ctx) => {
@@ -72,7 +71,6 @@ const options: RelayOptions<{ token: string }> = {
 
 ### Properties
 
-- `error?`: Custom [Next.js error page](https://nextjs.org/docs/advanced-features/custom-error-page).
 - `fallback?`: React component to use as a loading indicator.
   See [React Suspense docs](https://reactjs.org/docs/concurrent-mode-suspense.html).
 - `createClientEnvironment`: A function that returns a `RelayEnvironment`. Should return
