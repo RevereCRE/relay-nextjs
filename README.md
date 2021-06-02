@@ -150,6 +150,7 @@ class MyDocument extends Document<MyDocumentProps> {
       </Html>
     );
   }
+}
 ```
 
 ### Configuring `_app`
