@@ -4,8 +4,8 @@ title: Installation and Setup
 
 ## Installing Relay
 
-Relay comes with quite a number of dependencies that don't involve Next.js. We'll set those up first
-before moving on to `relay-nextjs`.
+Relay comes with quite a number of dependencies that don't involve Next.js.
+We'll set those up first before moving on to `relay-nextjs`.
 
 First install Relay's runtime dependencies:
 
@@ -28,7 +28,8 @@ Relay:
 npm install --save-dev relay-config
 ```
 
-Create `relay.config.js`. For Next.js projects using TypeScript this should look something like this:
+Create `relay.config.js`. For Next.js projects using TypeScript this should look
+something like this:
 
 ```js
 module.exports = {
@@ -71,9 +72,9 @@ Then configure Babel to compile away `graphql` strings:
 }
 ```
 
-`relay-nextjs` is designed to run on both the server and client. To avoid pulling in server
-dependencies to the client bundle configure Webpack to ignore any files in `src/lib/server`.
-In `next.config.js`:
+`relay-nextjs` is designed to run on both the server and client. To avoid
+pulling in server dependencies to the client bundle configure Webpack to ignore
+any files in `src/lib/server`. In `next.config.js`:
 
 ```js
 module.exports = {
@@ -88,4 +89,5 @@ module.exports = {
 };
 ```
 
-If your path to server-only files is different please adjust the above RegExp properly.
+If your path to server-only files is different please adjust the above RegExp
+properly.

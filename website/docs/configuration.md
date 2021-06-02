@@ -12,13 +12,22 @@ npm install relay-nextjs
 
 ## Routing Integration
 
-`relay-nextjs` must be configured in both a custom `_document` and `_app` to properly intercept and handle routing.
+`relay-nextjs` must be configured in both a custom `_document` and `_app` to
+properly intercept and handle routing.
 
 ### Setting up the Relay Environment
 
-For basic information about the Relay environment please see the [Relay docs](https://relay.dev/docs/getting-started/step-by-step-guide/#42-configure-relay-runtime).
+For basic information about the Relay environment please see the
+[Relay docs](https://relay.dev/docs/getting-started/step-by-step-guide/#42-configure-relay-runtime).
 
-`relay-nextjs` was designed with both client-side and server-side rendering in mind. As such it needs to be able to use either a client-side or server-side Relay environment. The library knows how to handle which environment to use, but we have to tell it how to create these environments. For this we will define two functions: `getClientEnvironment` and `createServerEnvironment`. Note the distinction — on the client only one environment is ever created because there is only one app, but on the server we must create an environment per-render to ensure the cache is not shared between requests.
+`relay-nextjs` was designed with both client-side and server-side rendering in
+mind. As such it needs to be able to use either a client-side or server-side
+Relay environment. The library knows how to handle which environment to use, but
+we have to tell it how to create these environments. For this we will define two
+functions: `getClientEnvironment` and `createServerEnvironment`. Note the
+distinction — on the client only one environment is ever created because there
+is only one app, but on the server we must create an environment per-render to
+ensure the cache is not shared between requests.
 
 First let’s define `getClientEnvironment`:
 
@@ -99,7 +108,8 @@ export function createServerEnvironment() {
 }
 ```
 
-Note in the example server environment we’re executing against a local schema but you may fetch from a remote API as well.
+Note in the example server environment we’re executing against a local schema
+but you may fetch from a remote API as well.
 
 ### Configuring `_document`
 

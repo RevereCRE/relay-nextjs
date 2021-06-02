@@ -1,5 +1,6 @@
 {
   "singleQuote": true,
   "bracketSpacing": true,
-  "arrowParens": "always"
+  "arrowParens": "always",
+  "proseWrap": "always"
 }

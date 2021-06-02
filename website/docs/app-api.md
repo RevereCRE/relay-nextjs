@@ -2,11 +2,13 @@
 title: Relay App API
 ---
 
-`relay-nextjs/app` is a set of APIs intended for use with a custom `App` in Next.js.
+`relay-nextjs/app` is a set of APIs intended for use with a custom `App` in
+Next.js.
 
 ## `getInitialPreloadedQuery`
 
-Returns a [`PreloadedQuery`](https://relay.dev/docs/api-reference/use-preloaded-query)
+Returns a
+[`PreloadedQuery`](https://relay.dev/docs/api-reference/use-preloaded-query)
 required for the initial page. Example usage:
 
 ```tsx
@@ -18,8 +20,9 @@ const initialPreloadedQuery = getInitialPreloadedQuery({
 ### Arguments
 
 - `options`:
-  - `options.createClientEnvironment`: A function that returns a `RelayEnvironment`. Should return
-    the same environment each time it is called.
+  - `options.createClientEnvironment`: A function that returns a
+    `RelayEnvironment`. Should return the same environment each time it is
+    called.
 
 ## `getRelayProps`
 

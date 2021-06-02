@@ -2,7 +2,8 @@
 title: Relay Document API
 ---
 
-`relay-nextjs/document` is a set of APIs intended for use with a custom `Document` in Next.js.
+`relay-nextjs/document` is a set of APIs intended for use with a custom
+`Document` in Next.js.
 
 ## `createRelayDocument`
 
@@ -50,7 +51,8 @@ class MyDocument extends Document<MyDocumentProps> {
 
 ### `Script`
 
-A React component that renders a script tag containing serialized state. Exmaple usage:
+A React component that renders a script tag containing serialized state. Exmaple
+usage:
 
 ```tsx
 class MyDocument extends Document<MyDocumentProps> {

@@ -4,8 +4,8 @@ title: Relay Page API
 
 ## `withRelay`
 
-Wraps a component, GraphQL query, and a set of options to manage loading the page
-and its data, as specified by the query. Example usage:
+Wraps a component, GraphQL query, and a set of options to manage loading the
+page and its data, as specified by the query. Example usage:
 
 ```tsx
 // src/pages/user/[uuid].tsx
@@ -38,7 +38,8 @@ export default withRelay(UserProfile, UserProfileQuery, options);
 
 ### Arguments
 
-- `component`: A [Next.js page component](https://nextjs.org/docs/basic-features/pages) to
+- `component`: A
+  [Next.js page component](https://nextjs.org/docs/basic-features/pages) to
   recieve the preloaded query from `relay-nextjs`.
 - `query`: A GraphQL query using the `graphql` tag from Relay.
 - `options`: A [`RelayOptions`](#relayoptions) object.
@@ -71,19 +72,23 @@ const options: RelayOptions<{ token: string }> = {
 
 ### Properties
 
-- `fallback?`: React component to use as a loading indicator.
-  See [React Suspense docs](https://reactjs.org/docs/concurrent-mode-suspense.html).
-- `createClientEnvironment`: A function that returns a `RelayEnvironment`. Should return
-  the same environment each time it is called.
-- `serverSideProps`: Fetch any server-side only props such as authentication tokens. Note that
-  you should import server-only deps with `await import('...')`.
-- `createServerEnvironment`: A function that returns a `RelayEnvironment`. First argument
-  is `NextPageContext` and the second is the object returned by `serverSideProps`.
+- `fallback?`: React component to use as a loading indicator. See
+  [React Suspense docs](https://reactjs.org/docs/concurrent-mode-suspense.html).
+- `clientSideProps?`: Provides props to the page on client-side navigations. Not
+  required.
+- `createClientEnvironment`: A function that returns a `RelayEnvironment`.
+  Should return the same environment each time it is called.
+- `serverSideProps`: Fetch any server-side only props such as authentication
+  tokens. Note that you should import server-only deps with
+  `await import('...')`.
+- `createServerEnvironment`: A function that returns a `RelayEnvironment`. First
+  argument is `NextPageContext` and the second is the object returned by
+  `serverSideProps`.
 
 ## `getRelaySerializedState`
 
-Returns serialized data collected from server-rendering. Should be used to create
-create a `RecordSource`. Example usage:
+Returns serialized data collected from server-rendering. Should be used to
+create create a `RecordSource`. Example usage:
 
 ```tsx
 // lib/client_environment.ts
