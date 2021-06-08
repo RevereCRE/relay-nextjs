@@ -78,12 +78,15 @@ const options: RelayOptions<{ token: string }> = {
   required.
 - `createClientEnvironment`: A function that returns a `RelayEnvironment`.
   Should return the same environment each time it is called.
-- `serverSideProps`: Fetch any server-side only props such as authentication
+- `serverSideProps?`: Fetch any server-side only props such as authentication
   tokens. Note that you should import server-only deps with
   `await import('...')`.
 - `createServerEnvironment`: A function that returns a `RelayEnvironment`. First
   argument is `NextPageContext` and the second is the object returned by
   `serverSideProps`.
+- `variablesFromContext?`: Function that extracts GraphQL query variables from
+  `NextPageContext`. Run on both the client and server. If omitted query
+  variables are set to `ctx.query`.
 
 ## `getRelaySerializedState`
 

@@ -1,12 +1,13 @@
 import type { NextPageContext, Redirect } from 'next';
-import Router from 'next/router';
-import React, { ComponentType, ReactNode, Suspense } from 'react';
-import { loadQuery, PreloadedQuery } from 'react-relay/hooks';
+import Router, { useRouter } from 'next/router';
+import React, { ComponentType, ReactNode, Suspense, useEffect } from 'react';
+import { loadQuery, PreloadedQuery, useQueryLoader } from 'react-relay/hooks';
 import {
   Environment,
   GraphQLTaggedNode,
   OperationType,
   RelayFeatureFlags,
+  Variables,
 } from 'relay-runtime';
 import { createWiredClientContext, createWiredServerContext } from './context';
 import { WiredErrorBoundry } from './error_boundry';
@@ -17,17 +18,19 @@ import type { AnyPreloadedQuery } from './types';
 (RelayFeatureFlags as any).ENABLE_REQUIRED_DIRECTIVES = true;
 
 export interface WiredOptions<ServerSideProps = {}> {
+  /** Fallback rendered when the page suspends. */
   fallback?: ReactNode;
-
+  variablesFromContext?: (ctx: NextPageContext) => Variables;
+  /** Called when creating a Relay environment on the client. Should be idempotent. */
   createClientEnvironment: () => Environment;
-
+  /** Props passed to the component when rendering on the client. */
   clientSideProps?: (ctx: NextPageContext) => void | { redirect: Redirect };
-
+  /** Called when creating a Relay environment on the server. */
   createServerEnvironment: (
     ctx: NextPageContext,
     props: ServerSideProps
   ) => Promise<Environment>;
-
+  /** Props passed to the component when rendering on the server. */
   serverSideProps?: (
     ctx: NextPageContext
   ) => Promise<ServerSideProps | { redirect: Redirect }>;
@@ -41,22 +44,36 @@ export type WiredProps<
   preloadedQuery: PreloadedQuery<Q>;
 };
 
+function defaultVariablesFromContext(ctx: NextPageContext): Variables {
+  return ctx.query;
+}
+
 export function Wire<Props extends WiredProps, ServerSideProps>(
   Component: ComponentType<Props>,
   query: GraphQLTaggedNode,
   opts: WiredOptions<ServerSideProps>
 ) {
   function WiredComponent(props: Props) {
+    const router = useRouter();
+    const [queryReference, loadQuery] = useQueryLoader(
+      query,
+      props.preloadedQuery
+    );
+
+    useEffect(() => {
+      loadQuery(router.query);
+    }, [loadQuery, router.query]);
+
     if (props.CSN) {
       return (
         <WiredErrorBoundry>
           <Suspense fallback={opts.fallback ?? 'Loading...'}>
-            <Component {...props} />
+            <Component {...props} preloadedQuery={queryReference} />
           </Suspense>
         </WiredErrorBoundry>
       );
     } else {
-      return <Component {...props} />;
+      return <Component {...props} preloadedQuery={queryReference} />;
     }
   }
 
@@ -83,6 +100,7 @@ async function getServerInitialProps<ServerSideProps>(
   query: GraphQLTaggedNode,
   opts: WiredOptions<ServerSideProps>
 ) {
+  const { variablesFromContext = defaultVariablesFromContext } = opts;
   const serverSideProps = opts.serverSideProps
     ? await opts.serverSideProps(ctx)
     : ({} as ServerSideProps);
@@ -98,7 +116,7 @@ async function getServerInitialProps<ServerSideProps>(
   }
 
   const env = await opts.createServerEnvironment(ctx, serverSideProps);
-  const variables = ctx.query;
+  const variables = variablesFromContext(ctx);
   const preloadedQuery = loadQuery(env, query, variables);
 
   await ensureQueryFlushed(preloadedQuery);
@@ -120,6 +138,7 @@ function getClientInitialProps<ServerSideProps>(
   query: GraphQLTaggedNode,
   opts: WiredOptions<ServerSideProps>
 ) {
+  const { variablesFromContext = defaultVariablesFromContext } = opts;
   const clientSideProps = opts.clientSideProps
     ? opts.clientSideProps(ctx)
     : undefined;
@@ -130,7 +149,7 @@ function getClientInitialProps<ServerSideProps>(
   }
 
   const env = opts.createClientEnvironment();
-  const variables = ctx.query;
+  const variables = variablesFromContext(ctx);
   const preloadedQuery = loadQuery(env, query, variables, {
     fetchPolicy: 'store-and-network',
   });
