@@ -1,5 +1,5 @@
 import type { NextPageContext, Redirect } from 'next';
-import Router, { useRouter } from 'next/router';
+import Router, { useRouter, NextRouter } from 'next/router';
 import React, { ComponentType, ReactNode, Suspense, useEffect } from 'react';
 import { loadQuery, PreloadedQuery, useQueryLoader } from 'react-relay/hooks';
 import {
@@ -17,10 +17,20 @@ import type { AnyPreloadedQuery } from './types';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (RelayFeatureFlags as any).ENABLE_REQUIRED_DIRECTIVES = true;
 
-export interface WiredOptions<ServerSideProps = {}> {
+export type WiredProps<
+  P extends {} = {},
+  Q extends OperationType = OperationType
+> = P & {
+  CSN: boolean;
+  preloadedQuery: PreloadedQuery<Q>;
+};
+
+export interface WiredOptions<Props extends WiredProps, ServerSideProps = {}> {
   /** Fallback rendered when the page suspends. */
   fallback?: ReactNode;
-  variablesFromContext?: (ctx: NextPageContext) => Variables;
+  variablesFromContext?: (
+    ctx: NextPageContext | NextRouter
+  ) => Props['preloadedQuery']['variables'];
   /** Called when creating a Relay environment on the client. Should be idempotent. */
   createClientEnvironment: () => Environment;
   /** Props passed to the component when rendering on the client. */
@@ -36,22 +46,16 @@ export interface WiredOptions<ServerSideProps = {}> {
   ) => Promise<ServerSideProps | { redirect: Redirect }>;
 }
 
-export type WiredProps<
-  P extends {} = {},
-  Q extends OperationType = OperationType
-> = P & {
-  CSN: boolean;
-  preloadedQuery: PreloadedQuery<Q>;
-};
-
-function defaultVariablesFromContext(ctx: NextPageContext): Variables {
+function defaultVariablesFromContext(
+  ctx: NextPageContext | NextRouter
+): Variables {
   return ctx.query;
 }
 
 export function Wire<Props extends WiredProps, ServerSideProps>(
   Component: ComponentType<Props>,
   query: GraphQLTaggedNode,
-  opts: WiredOptions<ServerSideProps>
+  opts: WiredOptions<Props, ServerSideProps>
 ) {
   function WiredComponent(props: Props) {
     const router = useRouter();
@@ -61,8 +65,10 @@ export function Wire<Props extends WiredProps, ServerSideProps>(
     );
 
     useEffect(() => {
-      loadQuery(router.query);
-    }, [loadQuery, router.query]);
+      loadQuery(
+        (opts.variablesFromContext ?? defaultVariablesFromContext)(router)
+      );
+    }, [loadQuery, router]);
 
     if (props.CSN) {
       return (
@@ -82,9 +88,9 @@ export function Wire<Props extends WiredProps, ServerSideProps>(
   return WiredComponent;
 }
 
-function wiredInitialProps<ServerSideProps>(
+function wiredInitialProps<Props extends WiredProps, ServerSideProps>(
   query: GraphQLTaggedNode,
-  opts: WiredOptions<ServerSideProps>
+  opts: WiredOptions<Props, ServerSideProps>
 ) {
   return async (ctx: NextPageContext) => {
     if (typeof window === 'undefined') {
@@ -95,10 +101,10 @@ function wiredInitialProps<ServerSideProps>(
   };
 }
 
-async function getServerInitialProps<ServerSideProps>(
+async function getServerInitialProps<Props extends WiredProps, ServerSideProps>(
   ctx: NextPageContext,
   query: GraphQLTaggedNode,
-  opts: WiredOptions<ServerSideProps>
+  opts: WiredOptions<Props, ServerSideProps>
 ) {
   const { variablesFromContext = defaultVariablesFromContext } = opts;
   const serverSideProps = opts.serverSideProps
@@ -133,10 +139,10 @@ async function getServerInitialProps<ServerSideProps>(
   };
 }
 
-function getClientInitialProps<ServerSideProps>(
+function getClientInitialProps<Props extends WiredProps, ServerSideProps>(
   ctx: NextPageContext,
   query: GraphQLTaggedNode,
-  opts: WiredOptions<ServerSideProps>
+  opts: WiredOptions<Props, ServerSideProps>
 ) {
   const { variablesFromContext = defaultVariablesFromContext } = opts;
   const clientSideProps = opts.clientSideProps
