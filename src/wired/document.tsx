@@ -29,7 +29,9 @@ export function createWiredDocument(): WiredDocument {
     };
   };
 
-  const Script = () => {
+
+
+  const Script = (props: React.ScriptHTMLAttributes<HTMLScriptElement>) => {
     if (capturedWiredContext == null) return null;
 
     const records = capturedWiredContext.preloadedQuery.environment
@@ -48,6 +50,7 @@ export function createWiredDocument(): WiredDocument {
         dangerouslySetInnerHTML={{
           __html: `window.__wired__=${serialize(serializedState)}`,
         }}
+        {...props}
       />
     );
   };
