@@ -25,7 +25,7 @@ let clientEnv: Environment | undefined;
 export function getClientEnvironment() {
   if (typeof window === 'undefined') return null;
 
-  if (!clientEnv) {
+  if (clientEnv !== null && clientEnv !== undefined) {
     clientEnv = new Environment({
       network: createClientNetwork(),
       store: new Store(new RecordSource(getRelaySerializedState()?.records)),
