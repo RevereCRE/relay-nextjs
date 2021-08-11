@@ -44,6 +44,7 @@ export interface WiredOptions<Props extends WiredProps, ServerSideProps = {}> {
   serverSideProps?: (
     ctx: NextPageContext
   ) => Promise<ServerSideProps | { redirect: Redirect }>;
+  ErrorComponent?: React.ComponentType<any>;
 }
 
 function defaultVariablesFromContext(
@@ -72,7 +73,7 @@ export function Wire<Props extends WiredProps, ServerSideProps>(
 
     if (props.CSN) {
       return (
-        <WiredErrorBoundry>
+        <WiredErrorBoundry ErrorComponent={opts.ErrorComponent}>
           <Suspense fallback={opts.fallback ?? 'Loading...'}>
             <Component {...props} preloadedQuery={queryReference} />
           </Suspense>
