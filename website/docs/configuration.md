@@ -160,6 +160,7 @@ class MyDocument extends NextDocument<DocumentProps> {
 
 ```tsx
 // src/pages/_app.tsx
+import { AppProps } from 'next/app';
 import { RelayEnvironmentProvider } from 'react-relay/hooks';
 import { getInitialPreloadedQuery, getRelayProps } from 'relay-nextjs/app';
 import { getClientEnvironment } from '../lib/client_environment';
