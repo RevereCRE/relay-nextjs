@@ -132,7 +132,7 @@ class MyDocument extends NextDocument<DocumentProps> {
         enhanceApp: (App) => relayDocument.enhance(App),
       });
 
-    const initialProps = await Document.getInitialProps(ctx);
+    const initialProps = await NextDocument.getInitialProps(ctx);
 
     return {
       ...initialProps,
