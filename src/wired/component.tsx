@@ -1,17 +1,18 @@
 import type { NextPageContext, Redirect } from 'next';
 import Router, { useRouter, NextRouter } from 'next/router';
-import React, { ComponentType, ReactNode, Suspense, useEffect } from 'react';
+import React, { ComponentType, ReactNode, Suspense, useEffect, useMemo } from 'react';
 import { loadQuery, PreloadedQuery, useQueryLoader } from 'react-relay/hooks';
 import {
   Environment,
   GraphQLTaggedNode,
   OperationType,
   RelayFeatureFlags,
-  Variables,
+  Variables, VariablesOf
 } from 'relay-runtime';
 import { createWiredClientContext, createWiredServerContext } from './context';
 import { WiredErrorBoundry } from './error_boundry';
 import type { AnyPreloadedQuery } from './types';
+import { UseQueryLoaderLoadQueryOptions } from 'react-relay/relay-hooks/useQueryLoader';
 
 // Enabling this feature flag to determine if a page should 404 on the server.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -23,6 +24,7 @@ export type WiredProps<
 > = P & {
   CSN: boolean;
   preloadedQuery: PreloadedQuery<Q>;
+  loadQuery: (variables: VariablesOf<never>, options?: UseQueryLoaderLoadQueryOptions) => void;
 };
 
 export interface WiredOptions<Props extends WiredProps, ServerSideProps = {}> {
@@ -65,22 +67,24 @@ export function Wire<Props extends WiredProps, ServerSideProps>(
       props.preloadedQuery
     );
 
+    const variables = useMemo(() => {
+      return (opts.variablesFromContext ?? defaultVariablesFromContext)(router);
+    }, [router, opts.variablesFromContext, defaultVariablesFromContext]);
+
     useEffect(() => {
-      loadQuery(
-        (opts.variablesFromContext ?? defaultVariablesFromContext)(router)
-      );
-    }, [loadQuery, router]);
+      loadQuery(variables);
+    }, [loadQuery, variables]);
 
     if (props.CSN) {
       return (
         <WiredErrorBoundry ErrorComponent={opts.ErrorComponent}>
           <Suspense fallback={opts.fallback ?? 'Loading...'}>
-            <Component {...props} preloadedQuery={queryReference} />
+            <Component {...props} preloadedQuery={queryReference} loadQuery={loadQuery}  />
           </Suspense>
         </WiredErrorBoundry>
       );
     } else {
-      return <Component {...props} preloadedQuery={queryReference} />;
+      return <Component {...props} preloadedQuery={queryReference} loadQuery={loadQuery} />;
     }
   }
 
