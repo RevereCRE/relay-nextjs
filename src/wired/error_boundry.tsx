@@ -1,19 +1,19 @@
 import Error from 'next/error';
 import React, { Component, PropsWithChildren } from 'react';
 
-type WiredErrorBoundryProps = PropsWithChildren<{
+type WiredErrorBoundaryProps = PropsWithChildren<{
   ErrorComponent?: React.ComponentType<any>;
 }>;
 
-interface WiredErrorBoundryState {
+interface WiredErrorBoundaryState {
   hasError: boolean;
 }
 
-export class WiredErrorBoundry extends Component<
-  WiredErrorBoundryProps,
-  WiredErrorBoundryState
+export class WiredErrorBoundary extends Component<
+  WiredErrorBoundaryProps,
+  WiredErrorBoundaryState
 > {
-  static getDerivedStateFromError(): WiredErrorBoundryState {
+  static getDerivedStateFromError(): WiredErrorBoundaryState {
     return { hasError: true };
   }
 

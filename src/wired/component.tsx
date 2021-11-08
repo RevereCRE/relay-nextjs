@@ -1,5 +1,5 @@
 import type { NextPageContext, Redirect } from 'next';
-import Router, { useRouter, NextRouter } from 'next/router';
+import Router, { NextRouter, useRouter } from 'next/router';
 import React, { ComponentType, ReactNode, Suspense, useEffect } from 'react';
 import { loadQuery, PreloadedQuery, useQueryLoader } from 'react-relay/hooks';
 import {
@@ -10,7 +10,7 @@ import {
   Variables,
 } from 'relay-runtime';
 import { createWiredClientContext, createWiredServerContext } from './context';
-import { WiredErrorBoundry } from './error_boundry';
+import { WiredErrorBoundary } from './error_boundry';
 import type { AnyPreloadedQuery } from './types';
 
 // Enabling this feature flag to determine if a page should 404 on the server.
@@ -25,6 +25,8 @@ export type WiredProps<
   preloadedQuery: PreloadedQuery<Q>;
 };
 
+export type OrRedirect<T> = T | { redirect: Redirect };
+
 export interface WiredOptions<Props extends WiredProps, ServerSideProps = {}> {
   /** Fallback rendered when the page suspends. */
   fallback?: ReactNode;
@@ -34,7 +36,9 @@ export interface WiredOptions<Props extends WiredProps, ServerSideProps = {}> {
   /** Called when creating a Relay environment on the client. Should be idempotent. */
   createClientEnvironment: () => Environment;
   /** Props passed to the component when rendering on the client. */
-  clientSideProps?: (ctx: NextPageContext) => void | { redirect: Redirect };
+  clientSideProps?: (
+    ctx: NextPageContext
+  ) => OrRedirect<Partial<ServerSideProps>>;
   /** Called when creating a Relay environment on the server. */
   createServerEnvironment: (
     ctx: NextPageContext,
@@ -43,7 +47,7 @@ export interface WiredOptions<Props extends WiredProps, ServerSideProps = {}> {
   /** Props passed to the component when rendering on the server. */
   serverSideProps?: (
     ctx: NextPageContext
-  ) => Promise<ServerSideProps | { redirect: Redirect }>;
+  ) => Promise<OrRedirect<ServerSideProps>>;
   ErrorComponent?: React.ComponentType<any>;
 }
 
@@ -60,24 +64,27 @@ export function Wire<Props extends WiredProps, ServerSideProps>(
 ) {
   function WiredComponent(props: Props) {
     const router = useRouter();
-    const [queryReference, loadQuery] = useQueryLoader(
+    const [queryReference, loadQuery, disposeQuery] = useQueryLoader(
       query,
       props.preloadedQuery
     );
 
     useEffect(() => {
-      loadQuery(
-        (opts.variablesFromContext ?? defaultVariablesFromContext)(router)
-      );
-    }, [loadQuery, router]);
+      const queryVariables = (
+        opts.variablesFromContext ?? defaultVariablesFromContext
+      )(router);
+
+      loadQuery(queryVariables);
+      return disposeQuery;
+    }, [loadQuery, disposeQuery, router]);
 
     if (props.CSN) {
       return (
-        <WiredErrorBoundry ErrorComponent={opts.ErrorComponent}>
+        <WiredErrorBoundary ErrorComponent={opts.ErrorComponent}>
           <Suspense fallback={opts.fallback ?? 'Loading...'}>
             <Component {...props} preloadedQuery={queryReference} />
           </Suspense>
-        </WiredErrorBoundry>
+        </WiredErrorBoundary>
       );
     } else {
       return <Component {...props} preloadedQuery={queryReference} />;
@@ -113,9 +120,18 @@ async function getServerInitialProps<Props extends WiredProps, ServerSideProps>(
     : ({} as ServerSideProps);
 
   if ('redirect' in serverSideProps) {
+    const { redirect } = serverSideProps;
+
+    let statusCode = 302;
+    if ('statusCode' in redirect) {
+      statusCode = redirect.statusCode;
+    } else if ('permanent' in redirect) {
+      statusCode = redirect.permanent ? 308 : 307;
+    }
+
     ctx
-      .res!.writeHead(302, {
-        Location: serverSideProps.redirect.destination,
+      .res!.writeHead(statusCode, {
+        Location: redirect.destination,
       })
       .end();
 
@@ -140,17 +156,17 @@ async function getServerInitialProps<Props extends WiredProps, ServerSideProps>(
   };
 }
 
-function getClientInitialProps<Props extends WiredProps, ServerSideProps>(
+function getClientInitialProps<Props extends WiredProps, ClientSideProps>(
   ctx: NextPageContext,
   query: GraphQLTaggedNode,
-  opts: WiredOptions<Props, ServerSideProps>
+  opts: WiredOptions<Props, ClientSideProps>
 ) {
   const { variablesFromContext = defaultVariablesFromContext } = opts;
   const clientSideProps = opts.clientSideProps
     ? opts.clientSideProps(ctx)
-    : undefined;
+    : ({} as ClientSideProps);
 
-  if (clientSideProps != null && 'redirect' in clientSideProps) {
+  if ('redirect' in clientSideProps) {
     Router.push(clientSideProps.redirect.destination);
     return {};
   }
@@ -165,7 +181,10 @@ function getClientInitialProps<Props extends WiredProps, ServerSideProps>(
     preloadedQuery,
   });
 
-  return { __wired__client__context: context };
+  return {
+    ...clientSideProps,
+    __wired__client__context: context,
+  };
 }
 
 function ensureQueryFlushed(query: AnyPreloadedQuery): Promise<void> {

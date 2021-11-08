@@ -1,5 +1,5 @@
 import type { ParsedUrlQuery } from 'querystring';
-import type { GraphQLTaggedNode } from 'react-relay';
+import type { GraphQLTaggedNode } from 'react-relay/hooks';
 import type { AnyPreloadedQuery } from './types';
 
 const WIRED_CONTEXT = Symbol('WIRED');

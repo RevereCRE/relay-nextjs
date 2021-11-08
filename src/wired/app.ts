@@ -1,5 +1,5 @@
 import type { AppProps } from 'next/app';
-import type { Environment } from 'react-relay';
+import type { Environment } from 'react-relay/hooks';
 import { loadQuery } from 'react-relay/hooks';
 import type { WiredProps } from './component';
 import { getWiredClientContext, getWiredServerContext } from './context';

@@ -1,3 +1,4 @@
+// eslint-disable-next-line @next/next/no-document-import-in-page
 import type { DocumentContext } from 'next/document';
 import React, { ComponentType } from 'react';
 import serialize from 'serialize-javascript';
@@ -28,8 +29,6 @@ export function createWiredDocument(): WiredDocument {
       return <App {...props} />;
     };
   };
-
-
 
   const Script = (props: React.ScriptHTMLAttributes<HTMLScriptElement>) => {
     if (capturedWiredContext == null) return null;
