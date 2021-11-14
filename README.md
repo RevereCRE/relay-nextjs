@@ -58,7 +58,7 @@ export function getClientEnvironment() {
   if (clientEnv == null) {
     clientEnv = new Environment({
       network: createClientNetwork(),
-      store: new Store(new RecordSource(getRleaySerializedState()?.records)),
+      store: new Store(new RecordSource(getRelaySerializedState()?.records)),
       isServer: false,
     });
   }
