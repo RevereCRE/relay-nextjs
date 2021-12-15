@@ -14,7 +14,7 @@ type AppEnhancer = NonNullable<RenderPageOptions['enhanceApp']>;
 
 export interface WiredDocument {
   enhance: AppEnhancer;
-  Script: ComponentType;
+  Script: ComponentType<React.ScriptHTMLAttributes<HTMLScriptElement>>;
 }
 
 export function createWiredDocument(): WiredDocument {
