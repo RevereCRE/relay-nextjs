@@ -1,8 +1,8 @@
-import Error from 'next/error';
+import Error, { ErrorProps } from 'next/error';
 import React, { Component, PropsWithChildren } from 'react';
 
-type WiredErrorBoundaryProps = PropsWithChildren<{
-  ErrorComponent?: React.ComponentType<any>;
+export type WiredErrorBoundaryProps = PropsWithChildren<{
+  ErrorComponent?: React.ComponentType<ErrorProps>;
 }>;
 
 interface WiredErrorBoundaryState {

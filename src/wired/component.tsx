@@ -1,6 +1,13 @@
 import type { NextPageContext, Redirect } from 'next';
 import Router, { NextRouter, useRouter } from 'next/router';
-import React, { ComponentType, ReactNode, Suspense, useEffect } from 'react';
+import React, {
+  ComponentType,
+  ReactNode,
+  Suspense,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { loadQuery, PreloadedQuery, useQueryLoader } from 'react-relay/hooks';
 import {
   Environment,
@@ -10,7 +17,7 @@ import {
   Variables,
 } from 'relay-runtime';
 import { createWiredClientContext, createWiredServerContext } from './context';
-import { WiredErrorBoundary } from './error_boundry';
+import { WiredErrorBoundary, WiredErrorBoundaryProps } from './error_boundry';
 import type { AnyPreloadedQuery } from './types';
 
 // Enabling this feature flag to determine if a page should 404 on the server.
@@ -48,13 +55,29 @@ export interface WiredOptions<Props extends WiredProps, ServerSideProps = {}> {
   serverSideProps?: (
     ctx: NextPageContext
   ) => Promise<OrRedirect<ServerSideProps>>;
-  ErrorComponent?: React.ComponentType<any>;
+  ErrorComponent?: WiredErrorBoundaryProps['ErrorComponent'];
 }
 
 function defaultVariablesFromContext(
   ctx: NextPageContext | NextRouter
 ): Variables {
   return ctx.query;
+}
+
+/** Hook that records if query variables have changed. */
+function useHaveQueryVariablesChanges(queryVariables: unknown) {
+  const [haveVarsChanged, setVarsChanged] = useState<'pending' | boolean>(
+    'pending'
+  );
+
+  useEffect(() => {
+    setVarsChanged((current) => {
+      if (current === 'pending') return false;
+      return true;
+    });
+  }, [queryVariables]);
+
+  return haveVarsChanged === 'pending' ? false : haveVarsChanged;
 }
 
 export function Wire<Props extends WiredProps, ServerSideProps>(
@@ -69,16 +92,25 @@ export function Wire<Props extends WiredProps, ServerSideProps>(
       props.preloadedQuery
     );
 
-    useEffect(() => {
-      const queryVariables = (
-        opts.variablesFromContext ?? defaultVariablesFromContext
-      )(router);
+    const queryVariables = useMemo(() => {
+      return (opts.variablesFromContext ?? defaultVariablesFromContext)(router);
+    }, [router]);
 
+    useEffect(() => {
       loadQuery(queryVariables);
       return disposeQuery;
-    }, [loadQuery, disposeQuery, router]);
+    }, [loadQuery, disposeQuery, queryVariables]);
 
-    if (props.CSN) {
+    const haveQueryVarsChanged = useHaveQueryVariablesChanges(queryVariables);
+
+    // If this component is being rendered from the client _or_ if it is a
+    // subsequent render of the same component with different query variables
+    // wrap with Suspense to catch page transitions. This is not done on
+    // server-side renders because React 17 doesn't support SSR + Suspense, is
+    // not done on the initial client render because it would caues React to
+    // think there is a markup mismatch (even though there isn't), and isn't
+    // done on mount to avoid unnecessary re-renders.
+    if (props.CSN || haveQueryVarsChanged) {
       return (
         <WiredErrorBoundary ErrorComponent={opts.ErrorComponent}>
           <Suspense fallback={opts.fallback ?? 'Loading...'}>
