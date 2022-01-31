@@ -42,29 +42,26 @@ module.exports = {
 };
 ```
 
-### Why configured `artifactDirectory` ?
+### Configuring `artifactDirectory`
 
-Next.js's `/pages` directory cannot exclude Non React Component as default export file.
+Next.js's `/pages` directory cannot include non-React components as default
+export.
 
-By default setting, The relay-compiler generates `*.graphql.ts` files that are co-located with the corresponding files containing graphql tags.
-
-#### Generate `*.graphql.ts` files at out of `/pages` directory.
+By default, the relay-compiler generates `*.graphql.ts` files that are
+co-located with the corresponding files containing graphql tags. To fix this
+configure `artifactDirectory` to emit to `src/queries/__generated__`:
 
 ```js:relay.config.js
 module.exports = {
-  ...
+  // ...
   artifactDirectory: 'src/queries/__generated__',
 }
 ```
 
-See also [Type Emission | Relay](https://relay.dev/docs/guides/type-emission/#single-artifact-directory)
-
-#### NOTE: You can keep `*.graphql.ts` files in `/pages` directory with `pageExtensions`
-
-[next.config.js: Custom Page Extensions | Next.js](https://nextjs.org/docs/api-reference/next.config.js/custom-page-extensions)
-
-1. Add `pageExtensions: ['page.ts', 'page.tsx']` in next.config.js
-2. Rename all page and api route files.
+For more information please see the Relay
+[type emission documentation](https://relay.dev/docs/guides/type-emission/#single-artifact-directory).
+Alternatively you can keep `*.graphql.ts` files in `/pages` directory with
+[`pageExtensions`](https://nextjs.org/docs/api-reference/next.config.js/custom-page-extensions).
 
 ## Installing Relay Compiler
 
