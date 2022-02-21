@@ -8,7 +8,12 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { loadQuery, PreloadedQuery, useQueryLoader } from 'react-relay/hooks';
+import {
+  loadQuery,
+  PreloadedQuery,
+  PreloadFetchPolicy,
+  useQueryLoader,
+} from 'react-relay/hooks';
 import {
   Environment,
   GraphQLTaggedNode,
@@ -56,6 +61,7 @@ export interface WiredOptions<Props extends WiredProps, ServerSideProps = {}> {
     ctx: NextPageContext
   ) => Promise<OrRedirect<ServerSideProps>>;
   ErrorComponent?: WiredErrorBoundaryProps['ErrorComponent'];
+  fetchPolicy?: PreloadFetchPolicy;
 }
 
 function defaultVariablesFromContext(
@@ -206,7 +212,7 @@ function getClientInitialProps<Props extends WiredProps, ClientSideProps>(
   const env = opts.createClientEnvironment();
   const variables = variablesFromContext(ctx);
   const preloadedQuery = loadQuery(env, query, variables, {
-    fetchPolicy: 'store-and-network',
+    fetchPolicy: opts.fetchPolicy || 'store-and-network',
   });
 
   const context = createWiredClientContext({
