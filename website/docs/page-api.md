@@ -51,6 +51,7 @@ Interface for configuring `withRelay`. Example usage:
 ```tsx
 const options: RelayOptions<{ token: string }> = {
   fallback: <Loading />,
+  fetchPolicy: 'store-and-network',
   createClientEnvironment: () => getClientEnvironment()!,
   serverSideProps: async (ctx) => {
     const { getTokenFromCtx } = await import('lib/server/auth');
@@ -74,6 +75,8 @@ const options: RelayOptions<{ token: string }> = {
 
 - `fallback?`: React component to use as a loading indicator. See
   [React Suspense docs](https://reactjs.org/docs/concurrent-mode-suspense.html).
+- `fetchPolicy?`: Relay fetch policy. Defaults to `store-and-network`. See
+  [Relay docs](https://relay.dev/docs/guided-tour/reusing-cached-data/fetch-policies/).
 - `clientSideProps?`: Provides props to the page on client-side navigations. Not
   required.
 - `createClientEnvironment`: A function that returns a `RelayEnvironment`.
