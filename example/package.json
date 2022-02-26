@@ -12,23 +12,22 @@
     "next": "^12.1.0",
     "react": "17.0.2",
     "react-dom": "17.0.2",
-    "react-relay": "^11.0.1",
-    "relay-nextjs": "^0.1.2"
+    "react-relay": "^13.1.1",
+    "relay-nextjs": "^0.7.0",
+    "relay-runtime": "^13.1.1"
   },
   "devDependencies": {
     "@types/node": "^17.0.21",
     "@types/react": "^17.0.3",
     "@types/react-dom": "^17.0.3",
-    "@types/react-relay": "^11.0.1",
+    "@types/react-relay": "^13.0.1",
     "@types/relay-runtime": "^11.0.0",
     "autoprefixer": "^10.2.5",
-    "babel-plugin-relay": "^11.0.1",
     "graphql": "^15.5.0",
     "postcss": "^8.2.9",
-    "relay-compiler": "^11.0.1",
-    "relay-compiler-language-typescript": "^14.0.0",
-    "relay-config": "^11.0.1",
+    "relay-compiler": "^13.1.1",
     "tailwindcss": "^2.1.1",
+    "typescript": "^4.5.5",
     "vscode-apollo-relay": "^1.5.1"
   }
 }

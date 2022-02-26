@@ -1,41 +1,28 @@
+/**
+ * @generated SignedSource<<09ea506460f6041b1df834301726692e>>
+ * @lightSyntaxTransform
+ * @nogrep
+ */
+
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
 
-import { ConcreteRequest } from "relay-runtime";
+import { ConcreteRequest, Query } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type Id_filmQueryVariables = {
-    id: string;
+export type Id_filmQuery$variables = {
+  id: string;
 };
-export type Id_filmQueryResponse = {
-    readonly film: {
-        readonly title: string | null;
-        readonly " $fragmentRefs": FragmentRefs<"Id_filmDescription">;
-    } | null;
+export type Id_filmQuery$data = {
+  readonly film: {
+    readonly title: string | null;
+    readonly " $fragmentSpreads": FragmentRefs<"Id_filmDescription">;
+  } | null;
 };
 export type Id_filmQuery = {
-    readonly response: Id_filmQueryResponse;
-    readonly variables: Id_filmQueryVariables;
+  variables: Id_filmQuery$variables;
+  response: Id_filmQuery$data;
 };
-
-
-
-/*
-query Id_filmQuery(
-  $id: ID!
-) {
-  film(id: $id) {
-    title
-    ...Id_filmDescription
-    id
-  }
-}
-
-fragment Id_filmDescription on Film {
-  director
-  openingCrawl
-}
-*/
 
 const node: ConcreteRequest = (function(){
 var v0 = [
@@ -138,5 +125,7 @@ return {
   }
 };
 })();
-(node as any).hash = '3573cf75b79f7fd10e324897f10a7d3a';
+
+(node as any).hash = "3573cf75b79f7fd10e324897f10a7d3a";
+
 export default node;
