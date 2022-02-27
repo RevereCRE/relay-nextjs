@@ -1,36 +1,28 @@
+/**
+ * @generated SignedSource<<4b786e7bb83bbdb4f636d8f71dac9a5f>>
+ * @lightSyntaxTransform
+ * @nogrep
+ */
+
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
 
-import { ConcreteRequest } from "relay-runtime";
-export type pages_listFilmsQueryVariables = {};
-export type pages_listFilmsQueryResponse = {
-    readonly allFilms: {
-        readonly films: ReadonlyArray<{
-            readonly id: string;
-            readonly title: string | null;
-            readonly openingCrawl: string | null;
-        } | null> | null;
-    } | null;
+import { ConcreteRequest, Query } from 'relay-runtime';
+export type pages_listFilmsQuery$variables = {};
+export type pages_listFilmsQuery$data = {
+  readonly allFilms: {
+    readonly films: ReadonlyArray<{
+      readonly id: string;
+      readonly title: string | null;
+      readonly openingCrawl: string | null;
+    } | null> | null;
+  } | null;
 };
 export type pages_listFilmsQuery = {
-    readonly response: pages_listFilmsQueryResponse;
-    readonly variables: pages_listFilmsQueryVariables;
+  variables: pages_listFilmsQuery$variables;
+  response: pages_listFilmsQuery$data;
 };
-
-
-
-/*
-query pages_listFilmsQuery {
-  allFilms {
-    films {
-      id
-      title
-      openingCrawl
-    }
-  }
-}
-*/
 
 const node: ConcreteRequest = (function(){
 var v0 = [
@@ -105,5 +97,7 @@ return {
   }
 };
 })();
-(node as any).hash = '26d1e122fd6b9b275c2ded9ee0a59a18';
+
+(node as any).hash = "26d1e122fd6b9b275c2ded9ee0a59a18";
+
 export default node;
