@@ -9,8 +9,7 @@ export type WiredErrorBoundaryProps = PropsWithChildren<{
 }>;
 
 interface WiredErrorBoundaryState {
-  hasError: boolean;
-  error: NextPageContext['err'];
+  error?: NextPageContext['err'];
 }
 
 export class WiredErrorBoundary extends Component<
@@ -20,32 +19,17 @@ export class WiredErrorBoundary extends Component<
   static getDerivedStateFromError(
     error: NextPageContext['err']
   ): WiredErrorBoundaryState {
-    return { hasError: true, error };
+    return { error };
   }
-
-  state = {
-    hasError: false,
-    error: {
-      name: 'Error 500',
-      message: 'Unknown',
-      stack: 'Unknown',
-      statusCode: 500,
-    },
-  };
 
   render() {
     const ErrorComponent = this.props.ErrorComponent;
 
     // Something happened, let consumers decide what to do with this type of error
-    let error: NextPageContext['err'] = {
-      name: 'Error 500',
-      message: 'Unknown',
-      stack: 'Unknown',
-      statusCode: 500,
-    };
+    let error: NextPageContext['err'];
 
     // Because passing this.state.error won't work
-    if (this.state.hasError)
+    if (this.state.error)
       error = {
         name: 'Error 500',
         message: this.state.error ? this.state.error.toString() : 'Unknown',
@@ -55,7 +39,10 @@ export class WiredErrorBoundary extends Component<
         statusCode: 500,
       };
 
-    if (this.state.hasError) {
+    // eslint-disable-next-line no-console
+    console.log('error_boundary:error', error);
+
+    if (error) {
       return ErrorComponent ? (
         <ErrorComponent statusCode={500} error={error} />
       ) : (
