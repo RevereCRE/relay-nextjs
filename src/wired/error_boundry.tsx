@@ -27,25 +27,11 @@ export class WiredErrorBoundary extends Component<
   render() {
     const ErrorComponent = this.props.ErrorComponent;
 
-    // Something happened, let consumers decide what to do with this type of error
-    let error: NextPageContext['err'];
-
-    // Because passing this.state.error won't work
-    if (this.state.error)
-      error = {
-        name: 'Error 500',
-        message: this.state.error ? this.state.error.toString() : 'Unknown',
-        stack: this.state.error?.stack
-          ? this.state.error.stack.toString()
-          : 'Unknown',
-        statusCode: 500,
-      };
-
-    if (error) {
+    if (this.state.error) {
       return ErrorComponent ? (
-        <ErrorComponent statusCode={500} error={error} />
+        <ErrorComponent statusCode={500} error={this.state.error} />
       ) : (
-        <Error statusCode={500} error={error} />
+        <Error statusCode={500} error={this.state.error} />
       );
     } else {
       return this.props.children;
