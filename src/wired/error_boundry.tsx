@@ -39,9 +39,6 @@ export class WiredErrorBoundary extends Component<
         statusCode: 500,
       };
 
-    // eslint-disable-next-line no-console
-    console.log('error_boundary:error', error);
-
     if (error) {
       return ErrorComponent ? (
         <ErrorComponent statusCode={500} error={error} />
