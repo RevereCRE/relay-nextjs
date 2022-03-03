@@ -9,7 +9,7 @@ export type WiredErrorBoundaryProps = PropsWithChildren<{
 }>;
 
 interface WiredErrorBoundaryState {
-  error?: NextPageContext['err'] | false;
+  error?: NextPageContext['err'];
 }
 
 export class WiredErrorBoundary extends Component<
@@ -22,7 +22,7 @@ export class WiredErrorBoundary extends Component<
     return { error };
   }
 
-  state: { error? : NextPageContext['err'] | false } = { error: false }
+  state: { error?: NextPageContext['err'] } = { error: undefined };
 
   render() {
     const ErrorComponent = this.props.ErrorComponent;
