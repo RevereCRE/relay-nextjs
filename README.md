@@ -1,4 +1,20 @@
-`relay-nextjs` acts as a bridge between Next.js and Relay.
+<h1 align="center">
+  Relay + Next.js
+</h1>
+
+<p align="center">
+  <a href="https://reverecre.github.io/relay-nextjs"><b>Documentation</b></a> |
+  <a href="https://github.com/RevereCRE/relay-nextjs/discussions"><b>Discussion</b></a> |
+  <a href="https://github.com/RevereCRE/relay-nextjs/releases"><b>Latest Releases</b></a> |
+</p>
+ 
+<p align="center">
+  <code>relay-nextjs</code> is the best way to use Relay and Next.js in the same project! It supports
+  <b>incremental migration</b>, is <b>suspense ready</b>, and is <b>run in production</b> by major
+  companies.
+</p>
+
+## Overview
 
 `relay-nextjs` wraps page components, a GraphQL query, and some helper methods to
 automatically hook up data fetching using Relay. On initial load a Relay
