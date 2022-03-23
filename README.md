@@ -1,3 +1,9 @@
+<p align="center">
+  <b>Revere CRE is hiring! Interested in working on the cutting edge of frontend?</b>
+  <br>
+  <b>Reach out to <a href="mailto:eng-jobs@reverecre.com">eng-jobs@reverecre.com</a> for more information.</b>
+</p>
+
 <h1 align="center">
   Relay + Next.js
 </h1>
