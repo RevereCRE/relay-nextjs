@@ -2,10 +2,14 @@
   Relay + Next.js
 </h1>
 
+[![npm version](https://badge.fury.io/js/relay-nextjs.svg)](https://badge.fury.io/js/relay-nextjs)
+![npm downloads](https://img.shields.io/npm/dm/relay-nextjs)
+![npm bundle size](https://img.shields.io/bundlephobia/minzip/relay-nextjs)
+
 <p align="center">
   <a href="https://reverecre.github.io/relay-nextjs"><b>Documentation</b></a> |
   <a href="https://github.com/RevereCRE/relay-nextjs/discussions"><b>Discussion</b></a> |
-  <a href="https://github.com/RevereCRE/relay-nextjs/releases"><b>Latest Releases</b></a> |
+  <a href="https://github.com/RevereCRE/relay-nextjs/releases"><b>Latest Releases</b></a>
 </p>
  
 <p align="center">
