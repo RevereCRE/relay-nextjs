@@ -98,11 +98,17 @@ pulling in server dependencies to the client bundle configure Webpack to ignore
 any files in `src/lib/server`. In `next.config.js`:
 
 ```js
+const webpack = require("webpack");
+
+//...
+
 module.exports = {
   webpack: (config, { isServer, webpack }) => {
     if (!isServer) {
       // Ensures no server modules are included on the client.
-      config.plugins.push(new webpack.IgnorePlugin(/lib\/server/));
+      config.plugins.push(
+        new webpack.IgnorePlugin({ resourceRegExp: /lib\/server/ })
+      );
     }
 
     return config;
