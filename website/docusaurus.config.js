@@ -37,7 +37,7 @@ module.exports = {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl:
-            'https://github.com/RevereCRE/relay-nextjs/edit/master/website/',
+            'https://github.com/RevereCRE/relay-nextjs/edit/main/website/',
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
