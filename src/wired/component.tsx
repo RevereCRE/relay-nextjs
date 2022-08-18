@@ -6,7 +6,7 @@ import React, {
   Suspense,
   useEffect,
   useMemo,
-  useState,
+  useRef,
 } from 'react';
 import {
   loadQuery,
@@ -22,7 +22,6 @@ import {
   Variables,
 } from 'relay-runtime';
 import { createWiredClientContext, createWiredServerContext } from './context';
-import { WiredErrorBoundary, WiredErrorBoundaryProps } from './error_boundry';
 import type { AnyPreloadedQuery } from './types';
 
 // Enabling this feature flag to determine if a page should 404 on the server.
@@ -60,7 +59,6 @@ export interface WiredOptions<Props extends WiredProps, ServerSideProps = {}> {
   serverSideProps?: (
     ctx: NextPageContext
   ) => Promise<OrRedirect<ServerSideProps>>;
-  ErrorComponent?: WiredErrorBoundaryProps['ErrorComponent'];
   fetchPolicy?: PreloadFetchPolicy;
 }
 
@@ -72,18 +70,15 @@ function defaultVariablesFromContext(
 
 /** Hook that records if query variables have changed. */
 function useHaveQueryVariablesChanges(queryVariables: unknown) {
-  const [haveVarsChanged, setVarsChanged] = useState<'pending' | boolean>(
-    'pending'
-  );
-
-  useEffect(() => {
-    setVarsChanged((current) => {
-      if (current === 'pending') return false;
-      return true;
-    });
+  const initialQueryVars = useRef(queryVariables);
+  return useMemo(() => {
+    // Shallow comparison of `initialQueryVars` and `queryVariables`.
+    return !Object.keys(queryVariables as {}).every(
+      (key) =>
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (queryVariables as any)[key] === (initialQueryVars.current as any)[key]
+    );
   }, [queryVariables]);
-
-  return haveVarsChanged === 'pending' ? false : haveVarsChanged;
 }
 
 export function Wire<Props extends WiredProps, ServerSideProps>(
@@ -118,11 +113,9 @@ export function Wire<Props extends WiredProps, ServerSideProps>(
     // done on mount to avoid unnecessary re-renders.
     if (props.CSN || haveQueryVarsChanged) {
       return (
-        <WiredErrorBoundary ErrorComponent={opts.ErrorComponent}>
-          <Suspense fallback={opts.fallback ?? 'Loading...'}>
-            <Component {...props} preloadedQuery={queryReference} />
-          </Suspense>
-        </WiredErrorBoundary>
+        <Suspense fallback={opts.fallback ?? 'Loading...'}>
+          <Component {...props} preloadedQuery={queryReference} />
+        </Suspense>
       );
     } else {
       return <Component {...props} preloadedQuery={queryReference} />;
@@ -205,7 +198,7 @@ function getClientInitialProps<Props extends WiredProps, ClientSideProps>(
     : ({} as ClientSideProps);
 
   if ('redirect' in clientSideProps) {
-    Router.push(clientSideProps.redirect.destination);
+    void Router.push(clientSideProps.redirect.destination);
     return {};
   }
 
@@ -225,7 +218,7 @@ function getClientInitialProps<Props extends WiredProps, ClientSideProps>(
   };
 }
 
-function ensureQueryFlushed(query: AnyPreloadedQuery): Promise<void> {
+async function ensureQueryFlushed(query: AnyPreloadedQuery): Promise<void> {
   return new Promise((resolve, reject) => {
     if (query.source == null) {
       resolve();
