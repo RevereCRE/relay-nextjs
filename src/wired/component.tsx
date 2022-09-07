@@ -16,6 +16,7 @@ import {
 } from 'react-relay/hooks';
 import {
   Environment,
+  GraphQLResponse,
   GraphQLTaggedNode,
   OperationType,
   RelayFeatureFlags,
@@ -60,6 +61,10 @@ export interface WiredOptions<Props extends WiredProps, ServerSideProps = {}> {
     ctx: NextPageContext
   ) => Promise<OrRedirect<ServerSideProps>>;
   fetchPolicy?: PreloadFetchPolicy;
+  serverSidePostQuery?: (
+    queryResult: GraphQLResponse | undefined,
+    ctx: NextPageContext
+  ) => Promise<unknown> | unknown;
 }
 
 function defaultVariablesFromContext(
@@ -145,7 +150,10 @@ async function getServerInitialProps<Props extends WiredProps, ServerSideProps>(
   query: GraphQLTaggedNode,
   opts: WiredOptions<Props, ServerSideProps>
 ) {
-  const { variablesFromContext = defaultVariablesFromContext } = opts;
+  const {
+    variablesFromContext = defaultVariablesFromContext,
+    serverSidePostQuery,
+  } = opts;
   const serverSideProps = opts.serverSideProps
     ? await opts.serverSideProps(ctx)
     : ({} as ServerSideProps);
@@ -174,6 +182,11 @@ async function getServerInitialProps<Props extends WiredProps, ServerSideProps>(
   const preloadedQuery = loadQuery(env, query, variables);
 
   await ensureQueryFlushed(preloadedQuery);
+
+  if (serverSidePostQuery) {
+    const queryResult = await preloadedQuery.source?.toPromise();
+    await serverSidePostQuery(queryResult, ctx);
+  }
 
   const context = createWiredServerContext({
     variables,

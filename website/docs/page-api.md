@@ -90,6 +90,10 @@ const options: RelayOptions<{ token: string }> = {
 - `variablesFromContext?`: Function that extracts GraphQL query variables from
   `NextPageContext`. Run on both the client and server. If omitted query
   variables are set to `ctx.query`.
+- `serverSidePostQuery?`: Function that is called during server side rendering after
+  fetching the query is finished. First parameter gives you access to the data returned by your
+  query and the second parameter gives access to `NextPageContext`. This function can
+  be used for example to set your response status to 404 if your query didn't return data.
 
 ## `getRelaySerializedState`
 
