@@ -76,13 +76,18 @@ function defaultVariablesFromContext(
 /** Hook that records if query variables have changed. */
 function useHaveQueryVariablesChanges(queryVariables: unknown) {
   const initialQueryVars = useRef(queryVariables);
+  const latch = useRef(false);
   return useMemo(() => {
+    if (latch.current) return latch.current;
+
     // Shallow comparison of `initialQueryVars` and `queryVariables`.
-    return !Object.keys(queryVariables as {}).every(
+    latch.current = !Object.keys(queryVariables as {}).every(
       (key) =>
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (queryVariables as any)[key] === (initialQueryVars.current as any)[key]
     );
+
+    return latch.current;
   }, [queryVariables]);
 }
 
