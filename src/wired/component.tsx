@@ -1,6 +1,6 @@
 import type { NextPageContext, Redirect } from 'next';
 import Router, { NextRouter, useRouter } from 'next/router';
-import React, {
+import {
   ComponentType,
   ReactNode,
   Suspense,
@@ -15,6 +15,8 @@ import {
   useQueryLoader,
 } from 'react-relay/hooks';
 import {
+  ConcreteRequest,
+  createOperationDescriptor,
   Environment,
   GraphQLResponse,
   GraphQLTaggedNode,
@@ -186,7 +188,11 @@ async function getServerInitialProps<Props extends WiredProps, ServerSideProps>(
   const variables = variablesFromContext(ctx);
   const preloadedQuery = loadQuery(env, query, variables);
 
-  await ensureQueryFlushed(preloadedQuery);
+  const payload = await ensureQueryFlushed(preloadedQuery);
+  const operationDescriptor = createOperationDescriptor(
+    ((query as unknown) as { default: ConcreteRequest }).default,
+    variables
+  );
 
   if (serverSidePostQuery) {
     const queryResult = await preloadedQuery.source?.toPromise();
@@ -194,9 +200,9 @@ async function getServerInitialProps<Props extends WiredProps, ServerSideProps>(
   }
 
   const context = createWiredServerContext({
-    variables,
-    query,
     preloadedQuery,
+    operationDescriptor,
+    payload,
   });
 
   return {
@@ -236,13 +242,15 @@ function getClientInitialProps<Props extends WiredProps, ClientSideProps>(
   };
 }
 
-async function ensureQueryFlushed(query: AnyPreloadedQuery): Promise<void> {
+async function ensureQueryFlushed(
+  query: AnyPreloadedQuery
+): Promise<GraphQLResponse> {
   return new Promise((resolve, reject) => {
     if (query.source == null) {
-      resolve();
+      resolve({ data: {} });
     } else {
       query.source.subscribe({
-        complete: resolve,
+        next: resolve,
         error: reject,
       });
     }

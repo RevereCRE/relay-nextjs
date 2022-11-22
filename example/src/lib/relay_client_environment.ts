@@ -1,4 +1,4 @@
-import { getRelaySerializedState } from 'relay-nextjs';
+import { hydrateRelayEnvironment } from 'relay-nextjs';
 import { Environment, Network, Store, RecordSource } from 'relay-runtime';
 
 export function createClientNetwork() {
@@ -28,9 +28,11 @@ export function getClientEnvironment() {
   if (clientEnv == null) {
     clientEnv = new Environment({
       network: createClientNetwork(),
-      store: new Store(new RecordSource(getRelaySerializedState()?.records)),
+      store: new Store(new RecordSource()),
       isServer: false,
     });
+
+    hydrateRelayEnvironment(clientEnv);
   }
 
   return clientEnv;

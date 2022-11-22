@@ -27,7 +27,6 @@
     "postcss": "^8.2.9",
     "relay-compiler": "^13.1.1",
     "tailwindcss": "^2.1.1",
-    "typescript": "^4.5.5",
-    "vscode-apollo-relay": "^1.5.1"
+    "typescript": "^4.5.5"
   }
 }

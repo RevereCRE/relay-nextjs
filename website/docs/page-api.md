@@ -90,19 +90,20 @@ const options: RelayOptions<{ token: string }> = {
 - `variablesFromContext?`: Function that extracts GraphQL query variables from
   `NextPageContext`. Run on both the client and server. If omitted query
   variables are set to `ctx.query`.
-- `serverSidePostQuery?`: Function that is called during server side rendering after
-  fetching the query is finished. First parameter gives you access to the data returned by your
-  query and the second parameter gives access to `NextPageContext`. This function can
-  be used for example to set your response status to 404 if your query didn't return data.
+- `serverSidePostQuery?`: Function that is called during server side rendering
+  after fetching the query is finished. First parameter gives you access to the
+  data returned by your query and the second parameter gives access to
+  `NextPageContext`. This function can be used for example to set your response
+  status to 404 if your query didn't return data.
 
-## `getRelaySerializedState`
+## `hydrateRelayEnvironment`
 
-Returns serialized data collected from server-rendering. Should be used to
-create create a `RecordSource`. Example usage:
+Hydrates an existing Relay environment with data fetched during the server
+render. Example usage:
 
 ```tsx
 // lib/client_environment.ts
-import { getRelaySerializedState } from 'relay-nextjs';
+import { hydrateRelayEnvironment } from 'relay-nextjs';
 import { withHydrateDatetime } from 'relay-nextjs/date';
 import { Environment, Network, Store, RecordSource } from 'relay-runtime';
 
@@ -132,9 +133,11 @@ export function getClientEnvironment() {
   if (clientEnv == null) {
     clientEnv = new Environment({
       network: createClientNetwork(),
-      store: new Store(new RecordSource(getRelaySerializedState()?.records)),
+      store: new Store(new RecordSource()),
       isServer: false,
     });
+
+    hydrateRelayEnvironment(clientEnv);
   }
 
   return clientEnv;

@@ -32,10 +32,15 @@ export function getInitialPreloadedQuery(opts: {
 }): AnyPreloadedQuery | null {
   if (typeof window === 'undefined') return null;
   const serializedState = getWiredSerializedState();
-  if (serializedState == null || serializedState.query == null) return null;
+  if (serializedState == null) return null;
 
   const env = opts.createClientEnvironment()!;
-  return loadQuery(env, serializedState.query, serializedState.variables, {
-    fetchPolicy: 'store-or-network',
-  });
+  return loadQuery(
+    env,
+    serializedState.operationDescriptor.request.node,
+    serializedState.operationDescriptor.request.variables,
+    {
+      fetchPolicy: 'store-or-network',
+    }
+  );
 }

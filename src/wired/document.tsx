@@ -33,15 +33,9 @@ export function createWiredDocument(): WiredDocument {
   const Script = (props: React.ScriptHTMLAttributes<HTMLScriptElement>) => {
     if (capturedWiredContext == null) return null;
 
-    const records = capturedWiredContext.preloadedQuery.environment
-      .getStore()
-      .getSource()
-      .toJSON();
-
     const serializedState: WiredSerializedState = {
-      records,
-      query: capturedWiredContext.query,
-      variables: capturedWiredContext.variables,
+      operationDescriptor: capturedWiredContext.operationDescriptor,
+      payload: capturedWiredContext.payload,
     };
 
     return (

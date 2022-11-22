@@ -1,10 +1,10 @@
-import type { ParsedUrlQuery } from 'querystring';
-import type { GraphQLTaggedNode, RecordSource } from 'relay-runtime';
+import type { OperationDescriptor } from 'react-relay';
+import type { GraphQLResponse, GraphQLSingularResponse } from 'relay-runtime';
+import type RelayModernEnvironment from 'relay-runtime/lib/store/RelayModernEnvironment';
 
 export interface WiredSerializedState {
-  records: ReturnType<RecordSource['toJSON']>;
-  query: GraphQLTaggedNode;
-  variables: ParsedUrlQuery;
+  operationDescriptor: OperationDescriptor;
+  payload: GraphQLResponse;
 }
 
 interface WiredWindow {
@@ -12,5 +12,15 @@ interface WiredWindow {
 }
 
 export function getWiredSerializedState(): WiredSerializedState | undefined {
-  return (window as WiredWindow)?.__wired__;
+  return (window as WiredWindow).__wired__;
+}
+
+export function hydrateRelayEnvironment(env: RelayModernEnvironment) {
+  const serializedState = getWiredSerializedState();
+  if (serializedState?.payload) {
+    env.commitPayload(
+      serializedState.operationDescriptor,
+      (serializedState.payload as GraphQLSingularResponse).data!
+    );
+  }
 }
