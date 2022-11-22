@@ -35,9 +35,9 @@ function FilmList({ preloadedQuery }: RelayProps<{}, pages_listFilmsQuery>) {
               className="rounded-md h-32 bg-gray-700 text-white"
             >
               <Link href={`/film/${film.id}`}>
-                <a className="hover:underline">
-                  <h2 className="text-center mt-3">{film.title}</h2>
-                </a>
+                <h2 className="text-center mt-3 hover:underline">
+                  {film.title}
+                </h2>
               </Link>
               <p className="text-sm p-2 truncate text-gray-200">
                 {film.openingCrawl}

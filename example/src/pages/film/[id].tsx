@@ -2,7 +2,6 @@ import { getClientEnvironment } from 'lib/relay_client_environment';
 import Link from 'next/link';
 import type { Id_filmDescription$key } from 'queries/__generated__/Id_filmDescription.graphql';
 import type { Id_filmQuery } from 'queries/__generated__/Id_filmQuery.graphql';
-import React from 'react';
 import { graphql, useFragment, usePreloadedQuery } from 'react-relay';
 import type { RelayProps } from 'relay-nextjs';
 import { withRelay } from 'relay-nextjs';
@@ -43,8 +42,8 @@ function Film({ preloadedQuery }: RelayProps<{}, Id_filmQuery>) {
   return (
     <div className="max-w-xl mx-auto p-8">
       <div className="flex items-center justify-center w-full pb-3">
-        <Link href="/">
-          <a className="text-blue-500 hover:underline mr-3">« Home</a>
+        <Link href="/" className="text-blue-500 hover:underline mr-3">
+          « Home
         </Link>
         <h1 className="text-center text-3xl font-semibold">
           {query.film.title}

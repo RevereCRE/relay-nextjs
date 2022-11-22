@@ -9,24 +9,24 @@
     "generate:relay": "relay-compiler"
   },
   "dependencies": {
-    "next": "^12.1.0",
-    "react": "17.0.2",
-    "react-dom": "17.0.2",
-    "react-relay": "^13.1.1",
-    "relay-nextjs": "^0.7.0",
-    "relay-runtime": "^13.1.1"
+    "next": "^13.0.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-relay": "^14.1.0",
+    "relay-nextjs": "^1.0.0-beta.0",
+    "relay-runtime": "^14.1.0"
   },
   "devDependencies": {
     "@types/node": "^17.0.21",
-    "@types/react": "^17.0.3",
-    "@types/react-dom": "^17.0.3",
-    "@types/react-relay": "^13.0.1",
-    "@types/relay-runtime": "^11.0.0",
+    "@types/react": "^18.0.25",
+    "@types/react-dom": "^18.0.9",
+    "@types/react-relay": "^14.1.2",
+    "@types/relay-runtime": "^14.1.4",
     "autoprefixer": "^10.2.5",
     "graphql": "^15.5.0",
     "postcss": "^8.2.9",
-    "relay-compiler": "^13.1.1",
+    "relay-compiler": "^14.1.0",
     "tailwindcss": "^2.1.1",
-    "typescript": "^4.5.5"
+    "typescript": "^4.9.3"
   }
 }
