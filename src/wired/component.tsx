@@ -52,7 +52,7 @@ export interface WiredOptions<Props extends WiredProps, ServerSideProps = {}> {
   /** Props passed to the component when rendering on the client. */
   clientSideProps?: (
     ctx: NextPageContext
-  ) => OrRedirect<Partial<ServerSideProps>>;
+  ) => OrRedirect<Partial<ServerSideProps>> | Promise<OrRedirect<Partial<ServerSideProps>>>;
   /** Called when creating a Relay environment on the server. */
   createServerEnvironment: (
     ctx: NextPageContext,
@@ -211,14 +211,14 @@ async function getServerInitialProps<Props extends WiredProps, ServerSideProps>(
   };
 }
 
-function getClientInitialProps<Props extends WiredProps, ClientSideProps>(
+async function getClientInitialProps<Props extends WiredProps, ClientSideProps>(
   ctx: NextPageContext,
   query: GraphQLTaggedNode,
   opts: WiredOptions<Props, ClientSideProps>
 ) {
   const { variablesFromContext = defaultVariablesFromContext } = opts;
   const clientSideProps = opts.clientSideProps
-    ? opts.clientSideProps(ctx)
+    ? await opts.clientSideProps(ctx)
     : ({} as ClientSideProps);
 
   if ('redirect' in clientSideProps) {

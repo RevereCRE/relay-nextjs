@@ -64,4 +64,10 @@ export default withRelay(Film, FilmQuery, {
 
     return createServerEnvironment();
   },
+  // clientSideProps with arbitrary sleep, 
+  // to show async or async capability
+  clientSideProps: async () => {
+    await new Promise(resolve => setTimeout(resolve, 200));
+    return {}
+  }
 });
