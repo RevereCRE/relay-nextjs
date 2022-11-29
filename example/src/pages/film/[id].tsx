@@ -64,10 +64,10 @@ export default withRelay(Film, FilmQuery, {
 
     return createServerEnvironment();
   },
-  // clientSideProps with arbitrary sleep, 
-  // to show async or async capability
+  // This code is executed on the client between page transitions.
+  // All props returned are passed directly to the component.
   clientSideProps: async () => {
-    await new Promise(resolve => setTimeout(resolve, 200));
-    return {}
-  }
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    return {};
+  },
 });
