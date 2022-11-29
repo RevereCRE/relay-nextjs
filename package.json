@@ -1,0 +1,14 @@
+{
+  "name": "relay-nextjs-workspace",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "workspaces": [
+    "example",
+    "packages/*"
+  ]
+}
