@@ -28,15 +28,19 @@
   "homepage": "https://github.com/RevereCRE/relay-nextjs#readme",
   "devDependencies": {
     "@types/node": "^14.14.41",
-    "@types/react": "^17.0.3",
-    "@types/react-dom": "^17.0.3",
-    "@types/react-relay": "^11.0.0",
-    "@types/relay-runtime": "^10.1.10",
+    "@types/react": "^18.0.25",
+    "@types/react-dom": "^18.0.9",
+    "@types/react-relay": "^14.1.2",
+    "@types/relay-runtime": "^14.1.0",
     "@types/serialize-javascript": "^5.0.0",
     "graphql": "^15.5.0",
     "next": "^10.0.9",
     "prettier": "^2.2.1",
-    "typescript": "^4.2.3"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-relay": "14.1.0",
+    "typescript": "4.2.3",
+    "relay-runtime": "14.1.0"
   },
   "dependencies": {
     "serialize-javascript": "^5.0.1"
