@@ -292,6 +292,8 @@ export default withRelay(UserProfile, UserProfileQuery, {
 
 If you'd like to contribute to this package, developing locally is simple.
 
+**Prerequisites**: Yarn v1 (v2 is not yet tested)
+
 1. Run `yarn` from the root of this package
 2. Start the live reloader for the package `cd packages/relay-nextjs && yarn build-w`
 3. In a separate terminal strt the example app: `cd example && yarn dev`
