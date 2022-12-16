@@ -192,7 +192,7 @@ async function getServerInitialProps<Props extends WiredProps, ServerSideProps>(
 
   const payload = await ensureQueryFlushed(preloadedQuery);
   const operationDescriptor = createOperationDescriptor(
-    ((query as unknown) as { default: ConcreteRequest }).default,
+    (query as unknown as { default: ConcreteRequest }).default,
     variables
   );
 

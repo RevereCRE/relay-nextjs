@@ -1,3 +1,8 @@
+# Build artifacts
+relay-nextjs/*.js
+relay-nextjs/*.d.ts
+relay-nextjs/wired/*
+
 # Logs
 logs
 *.log
