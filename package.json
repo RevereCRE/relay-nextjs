@@ -9,6 +9,6 @@
   "license": "ISC",
   "workspaces": [
     "example",
-    "packages/*"
+    "relay-nextjs"
   ]
 }
