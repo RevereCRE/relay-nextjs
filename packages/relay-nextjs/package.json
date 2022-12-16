@@ -5,7 +5,6 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "build-w": "tsc -w",
     "clean": "rm *.js *.d.ts && rm -rf wired",
     "format": "prettier --write .",
     "check": "npm run check:prettier",
