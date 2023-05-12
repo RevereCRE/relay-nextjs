@@ -24,6 +24,8 @@ import {
   RelayFeatureFlags,
   Variables,
 } from 'relay-runtime';
+import deepEqual from 'deep-equal';
+
 import { createWiredClientContext, createWiredServerContext } from './context';
 import type { AnyPreloadedQuery } from './types';
 
@@ -84,12 +86,7 @@ function useHaveQueryVariablesChanges(queryVariables: unknown) {
   return useMemo(() => {
     if (latch.current) return latch.current;
 
-    // Shallow comparison of `initialQueryVars` and `queryVariables`.
-    latch.current = !Object.keys(queryVariables as {}).every(
-      (key) =>
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (queryVariables as any)[key] === (initialQueryVars.current as any)[key]
-    );
+    latch.current = deepEqual(initialQueryVars.current, queryVariables);
 
     return latch.current;
   }, [queryVariables]);
