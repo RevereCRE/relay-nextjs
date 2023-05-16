@@ -41,7 +41,10 @@ export type WiredProps<
 
 export type OrRedirect<T> = T | { redirect: Redirect };
 
-export interface WiredOptions<Props extends WiredProps, ServerSideProps = {}> {
+export interface WiredOptions<
+  Props extends WiredProps,
+  ServerSideProps extends {} = {}
+> {
   /** Fallback rendered when the page suspends. */
   fallback?: ReactNode;
   variablesFromContext?: (
@@ -95,7 +98,7 @@ function useHaveQueryVariablesChanges(queryVariables: unknown) {
   }, [queryVariables]);
 }
 
-export function Wire<Props extends WiredProps, ServerSideProps>(
+export function Wire<Props extends WiredProps, ServerSideProps extends {} = {}>(
   Component: ComponentType<Props>,
   query: GraphQLTaggedNode,
   opts: WiredOptions<Props, ServerSideProps>
@@ -141,10 +144,10 @@ export function Wire<Props extends WiredProps, ServerSideProps>(
   return WiredComponent;
 }
 
-function wiredInitialProps<Props extends WiredProps, ServerSideProps>(
-  query: GraphQLTaggedNode,
-  opts: WiredOptions<Props, ServerSideProps>
-) {
+function wiredInitialProps<
+  Props extends WiredProps,
+  ServerSideProps extends {}
+>(query: GraphQLTaggedNode, opts: WiredOptions<Props, ServerSideProps>) {
   return async (ctx: NextPageContext) => {
     if (typeof window === 'undefined') {
       return getServerInitialProps(ctx, query, opts);
@@ -154,7 +157,10 @@ function wiredInitialProps<Props extends WiredProps, ServerSideProps>(
   };
 }
 
-async function getServerInitialProps<Props extends WiredProps, ServerSideProps>(
+async function getServerInitialProps<
+  Props extends WiredProps,
+  ServerSideProps extends {}
+>(
   ctx: NextPageContext,
   query: GraphQLTaggedNode,
   opts: WiredOptions<Props, ServerSideProps>
@@ -215,7 +221,10 @@ async function getServerInitialProps<Props extends WiredProps, ServerSideProps>(
   };
 }
 
-async function getClientInitialProps<Props extends WiredProps, ClientSideProps>(
+async function getClientInitialProps<
+  Props extends WiredProps,
+  ClientSideProps extends {}
+>(
   ctx: NextPageContext,
   query: GraphQLTaggedNode,
   opts: WiredOptions<Props, ClientSideProps>
