@@ -63,8 +63,6 @@ First we'll define `getClientEnvironment`:
 
 ```tsx
 // lib/client_environment.ts
-import { hydrateRelayEnvironment } from 'relay-nextjs';
-import { withHydrateDatetime } from 'relay-nextjs/date';
 import { Environment, Network, Store, RecordSource } from 'relay-runtime';
 
 export function createClientNetwork() {
@@ -82,7 +80,7 @@ export function createClientNetwork() {
     });
 
     const json = await response.text();
-    return JSON.parse(json, withHydrateDatetime);
+    return JSON.parse(json);
   });
 }
 
@@ -96,8 +94,6 @@ export function getClientEnvironment() {
       store: new Store(new RecordSource()),
       isServer: false,
     });
-
-    hydrateRelayEnvironment(clientEnv);
   }
 
   return clientEnv;
@@ -108,7 +104,6 @@ and then `createServerEnvironment`:
 
 ```tsx
 import { graphql } from 'graphql';
-import { withHydrateDatetime } from 'relay-nextjs/date';
 import { GraphQLResponse, Network } from 'relay-runtime';
 import { schema } from 'lib/schema';
 
@@ -126,12 +121,7 @@ export function createServerNetwork() {
       contextValue: context,
     });
 
-    const data = JSON.parse(
-      JSON.stringify(results),
-      withHydrateDatetime
-    ) as GraphQLResponse;
-
-    return data;
+    return JSON.parse(JSON.stringify(results)) as GraphQLResponse;
   });
 }
 
