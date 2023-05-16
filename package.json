@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc && cp -r dist/* . && rm -rf dist",
-    "clean": "rm *.js *.d.ts && rm -rf wired",
+    "clean": "rm *.js *.d.ts",
     "format": "prettier --write .",
     "check": "npm run check:prettier",
     "check:prettier": "prettier --check ."
@@ -45,8 +45,6 @@
   },
   "files": [
     "*.js",
-    "*.d.ts",
-    "wired/*.js",
-    "wired/*.d.ts"
+    "*.d.ts"
   ]
 }
