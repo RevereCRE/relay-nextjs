@@ -18,7 +18,7 @@ module.exports = {
     {
       type: 'category',
       label: 'API Reference',
-      items: ['page-api', 'document-api', 'app-api'],
+      items: ['page-api', 'app-api'],
     },
   ],
 };
