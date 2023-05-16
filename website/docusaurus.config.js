@@ -3,7 +3,7 @@ module.exports = {
   title: 'relay-nextjs',
   tagline: 'Relay Hooks integration for Next.js apps',
   url: 'https://reverecre.github.io',
-  baseUrl: '/',
+  baseUrl: '/relay-nextjs/',
   organizationName: 'RevereCRE',
   projectName: 'relay-nextjs',
   trailingSlash: false,
