@@ -3,7 +3,7 @@
     "module": "CommonJS",
     "target": "ES2015",
     "jsx": "react-jsx",
-    "outDir": ".",
+    "outDir": "dist",
     "declaration": true,
     "allowJs": false,
     "allowUnusedLabels": false,
@@ -18,6 +18,5 @@
     "skipLibCheck": true,
     "strict": true
   },
-  "include": ["src/**.ts"],
-  "exclude": ["**/**.js"]
+  "include": ["src/**.ts"]
 }
