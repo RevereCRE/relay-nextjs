@@ -12,8 +12,8 @@ npm install relay-nextjs
 
 ## Routing Integration
 
-`relay-nextjs` must be configured in both a custom `_document` and `_app` to
-properly intercept and handle routing.
+`relay-nextjs` must be configured in a custom `_app` to properly intercept and
+handle routing.
 
 ### Setting up the Relay Environment
 
@@ -110,71 +110,18 @@ export function createServerEnvironment() {
 }
 ```
 
-Note in the example server environment we’re executing against a local schema
-but you may fetch from a remote API as well.
-
-### Configuring `_document`
-
-```tsx
-// src/pages/_document.tsx
-import { createRelayDocument, RelayDocument } from 'relay-nextjs/document';
-import NextDocument, { Html, Head, DocumentContext } from 'next/document';
-
-interface DocumentProps {
-  relayDocument: RelayDocument;
-}
-
-class MyDocument extends NextDocument<DocumentProps> {
-  static async getInitialProps(ctx: DocumentContext) {
-    const relayDocument = createRelayDocument();
-
-    const renderPage = ctx.renderPage;
-    ctx.renderPage = () =>
-      renderPage({
-        enhanceApp: (App) => relayDocument.enhance(App),
-      });
-
-    const initialProps = await NextDocument.getInitialProps(ctx);
-
-    return {
-      ...initialProps,
-      relayDocument,
-    };
-  }
-
-  render() {
-    const { relayDocument } = this.props;
-
-    return (
-      <Html>
-        <Head>
-          {/* ... */}
-          <relayDocument.Script />
-        </Head>
-        {/* ... */}
-      </Html>
-    );
-  }
-}
-```
-
 ### Configuring `_app`
 
 ```tsx
-// src/pages/_app.tsx
-import { AppProps } from 'next/app';
+// pages/_app.tsx
 import { RelayEnvironmentProvider } from 'react-relay/hooks';
-import { getInitialPreloadedQuery, getRelayProps } from 'relay-nextjs/app';
+import { useRelayNextjs } from 'relay-nextjs/app';
 import { getClientEnvironment } from '../lib/client_environment';
 
-const clientEnv = getClientEnvironment();
-const initialPreloadedQuery = getInitialPreloadedQuery({
-  createClientEnvironment: () => getClientEnvironment()!,
-});
-
 function MyApp({ Component, pageProps }: AppProps) {
-  const relayProps = getRelayProps(pageProps, initialPreloadedQuery);
-  const env = relayProps.preloadedQuery?.environment ?? clientEnv!;
+  const { env, ...relayProps } = useRelayNextjs(pageProps, {
+    createClientEnvironment: () => getClientSideEnvironment()!,
+  });
 
   return (
     <>

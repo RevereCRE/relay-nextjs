@@ -1,3 +1,4 @@
+import isEqual from 'lodash.isequal';
 import type { NextPageContext, Redirect } from 'next';
 import Router, { NextRouter, useRouter } from 'next/router';
 import {
@@ -7,42 +8,50 @@ import {
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from 'react';
-import {
-  loadQuery,
-  PreloadedQuery,
-  PreloadFetchPolicy,
-  useQueryLoader,
-} from 'react-relay/hooks';
+import { PreloadedQuery, loadQuery, useRelayEnvironment } from 'react-relay';
 import {
   ConcreteRequest,
-  createOperationDescriptor,
   Environment,
   GraphQLResponse,
   GraphQLTaggedNode,
+  OperationDescriptor,
   OperationType,
   RelayFeatureFlags,
   Variables,
+  createOperationDescriptor,
 } from 'relay-runtime';
-import { createWiredClientContext, createWiredServerContext } from './context';
-import type { AnyPreloadedQuery } from './types';
+import { HydrationMeta, collectMeta } from './json_meta';
+
+export type AnyPreloadedQuery = PreloadedQuery<OperationType>;
 
 // Enabling this feature flag to determine if a page should 404 on the server.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (RelayFeatureFlags as any).ENABLE_REQUIRED_DIRECTIVES = true;
 
-export type WiredProps<
+export type RelayProps<
+  P extends {} = {},
+  Q extends OperationType = OperationType
+> = P & Required<Pick<UseRelayNextJsProps<P, Q>, 'CSN' | 'preloadedQuery'>>;
+
+export type UseRelayNextJsProps<
   P extends {} = {},
   Q extends OperationType = OperationType
 > = P & {
+  /** If this page rendering resulted from a client-side navigation. */
   CSN: boolean;
-  preloadedQuery: PreloadedQuery<Q>;
+  /** Undefined during initial hydration, but defined for SSR and subsequent renders */
+  preloadedQuery?: PreloadedQuery<Q>;
+  operationDescriptor?: OperationDescriptor;
+  payload?: GraphQLResponse;
+  payloadMeta?: HydrationMeta;
 };
 
 export type OrRedirect<T> = T | { redirect: Redirect };
 
-export interface WiredOptions<
-  Props extends WiredProps,
+export interface RelayOptions<
+  Props extends RelayProps,
   ServerSideProps extends {} = {}
 > {
   /** Fallback rendered when the page suspends. */
@@ -55,9 +64,7 @@ export interface WiredOptions<
   /** Props passed to the component when rendering on the client. */
   clientSideProps?: (
     ctx: NextPageContext
-  ) =>
-    | OrRedirect<Partial<ServerSideProps>>
-    | Promise<OrRedirect<Partial<ServerSideProps>>>;
+  ) => OrRedirect<Partial<ServerSideProps>>;
   /** Called when creating a Relay environment on the server. */
   createServerEnvironment: (
     ctx: NextPageContext,
@@ -67,11 +74,6 @@ export interface WiredOptions<
   serverSideProps?: (
     ctx: NextPageContext
   ) => Promise<OrRedirect<ServerSideProps>>;
-  fetchPolicy?: PreloadFetchPolicy;
-  serverSidePostQuery?: (
-    queryResult: GraphQLResponse | undefined,
-    ctx: NextPageContext
-  ) => Promise<unknown> | unknown;
 }
 
 function defaultVariablesFromContext(
@@ -80,75 +82,74 @@ function defaultVariablesFromContext(
   return ctx.query;
 }
 
-/** Hook that records if query variables have changed. */
-function useHaveQueryVariablesChanges(queryVariables: unknown) {
-  const initialQueryVars = useRef(queryVariables);
-  const latch = useRef(false);
-  return useMemo(() => {
-    if (latch.current) return latch.current;
-
-    // Shallow comparison of `initialQueryVars` and `queryVariables`.
-    latch.current = !Object.keys(queryVariables as {}).every(
-      (key) =>
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (queryVariables as any)[key] === (initialQueryVars.current as any)[key]
-    );
-
-    return latch.current;
-  }, [queryVariables]);
-}
-
-export function Wire<Props extends WiredProps, ServerSideProps extends {} = {}>(
+export function withRelay<Props extends RelayProps, ServerSideProps extends {}>(
   Component: ComponentType<Props>,
   query: GraphQLTaggedNode,
-  opts: WiredOptions<Props, ServerSideProps>
+  opts: RelayOptions<Props, ServerSideProps>
 ) {
-  function WiredComponent(props: Props) {
+  function useLoadedQuery(initialPreloadedQuery: Props['preloadedQuery']) {
     const router = useRouter();
-    const [queryReference, loadQuery, disposeQuery] = useQueryLoader(
-      query,
-      props.preloadedQuery
-    );
 
+    const lastQueryVariables = useRef<Variables>();
     const queryVariables = useMemo(() => {
-      return (opts.variablesFromContext ?? defaultVariablesFromContext)(router);
+      const nextQueryVariables = (
+        opts.variablesFromContext ?? defaultVariablesFromContext
+      )(router);
+
+      // In the case that the previous query variables are not deep equal to the
+      // next set of query variables update our reference. This ensures
+      // Object.is equality is maintained across renders.
+      if (
+        lastQueryVariables.current == null ||
+        !isEqual(lastQueryVariables.current, nextQueryVariables)
+      ) {
+        lastQueryVariables.current = nextQueryVariables;
+      }
+
+      return lastQueryVariables.current;
     }, [router]);
 
+    const [preloadedQuery, setPreloadedQuery] = useState(initialPreloadedQuery);
+
+    const isMountedRef = useRef(false);
+    const env = useRelayEnvironment();
     useEffect(() => {
-      loadQuery(queryVariables);
-      return disposeQuery;
-    }, [loadQuery, disposeQuery, queryVariables]);
+      // Avoid re-setting the initial preloaded query on the first render.
+      if (!isMountedRef.current) {
+        isMountedRef.current = true;
+        return;
+      }
 
-    const haveQueryVarsChanged = useHaveQueryVariablesChanges(queryVariables);
+      const nextPreloadedQuery = loadQuery(env, query, queryVariables, {
+        fetchPolicy: 'store-or-network',
+      });
 
-    // If this component is being rendered from the client _or_ if it is a
-    // subsequent render of the same component with different query variables
-    // wrap with Suspense to catch page transitions. This is not done on
-    // server-side renders because React 17 doesn't support SSR + Suspense, is
-    // not done on the initial client render because it would caues React to
-    // think there is a markup mismatch (even though there isn't), and isn't
-    // done on mount to avoid unnecessary re-renders.
-    if (props.CSN || haveQueryVarsChanged) {
-      return (
-        <Suspense fallback={opts.fallback ?? 'Loading...'}>
-          <Component {...props} preloadedQuery={queryReference} />
-        </Suspense>
-      );
-    } else {
-      return <Component {...props} preloadedQuery={queryReference} />;
-    }
+      setPreloadedQuery(nextPreloadedQuery);
+      return () => nextPreloadedQuery.dispose();
+    }, [env, queryVariables]);
+
+    return preloadedQuery;
   }
 
-  WiredComponent.getInitialProps = wiredInitialProps(query, opts);
+  function RelayComponent(props: Props) {
+    const preloadedQuery = useLoadedQuery(props.preloadedQuery);
+    return (
+      <Suspense fallback={opts.fallback ?? 'Loading...'}>
+        <Component {...props} preloadedQuery={preloadedQuery} />
+      </Suspense>
+    );
+  }
 
-  return WiredComponent;
+  RelayComponent.getInitialProps = relayInitialProps(query, opts);
+
+  return RelayComponent;
 }
 
-function wiredInitialProps<
-  Props extends WiredProps,
+function relayInitialProps<
+  Props extends RelayProps,
   ServerSideProps extends {}
->(query: GraphQLTaggedNode, opts: WiredOptions<Props, ServerSideProps>) {
-  return async (ctx: NextPageContext) => {
+>(query: GraphQLTaggedNode, opts: RelayOptions<Props, ServerSideProps>) {
+  return async (ctx: NextPageContext): Promise<UseRelayNextJsProps> => {
     if (typeof window === 'undefined') {
       return getServerInitialProps(ctx, query, opts);
     } else {
@@ -158,17 +159,14 @@ function wiredInitialProps<
 }
 
 async function getServerInitialProps<
-  Props extends WiredProps,
+  Props extends RelayProps,
   ServerSideProps extends {}
 >(
   ctx: NextPageContext,
   query: GraphQLTaggedNode,
-  opts: WiredOptions<Props, ServerSideProps>
-) {
-  const {
-    variablesFromContext = defaultVariablesFromContext,
-    serverSidePostQuery,
-  } = opts;
+  opts: RelayOptions<Props, ServerSideProps>
+): Promise<UseRelayNextJsProps> {
+  const { variablesFromContext = defaultVariablesFromContext } = opts;
   const serverSideProps = opts.serverSideProps
     ? await opts.serverSideProps(ctx)
     : ({} as ServerSideProps);
@@ -189,7 +187,7 @@ async function getServerInitialProps<
       })
       .end();
 
-    return { __wired__server__context: {} };
+    return { CSN: false };
   }
 
   const env = await opts.createServerEnvironment(ctx, serverSideProps);
@@ -197,61 +195,57 @@ async function getServerInitialProps<
   const preloadedQuery = loadQuery(env, query, variables);
 
   const payload = await ensureQueryFlushed(preloadedQuery);
-
-  const request: { default: ConcreteRequest } | ConcreteRequest = query as any;
+  const payloadSerializationMetadata = collectMeta(payload);
   const operationDescriptor = createOperationDescriptor(
-    'default' in request ? request.default : request,
+    (query as unknown as { default: ConcreteRequest }).default,
     variables
   );
 
-  if (serverSidePostQuery) {
-    const queryResult = await preloadedQuery.source?.toPromise();
-    await serverSidePostQuery(queryResult, ctx);
-  }
-
-  const context = createWiredServerContext({
-    preloadedQuery,
+  const props: UseRelayNextJsProps = {
+    ...serverSideProps,
+    CSN: false,
     operationDescriptor,
     payload,
+    payloadMeta: payloadSerializationMetadata,
+  };
+
+  // This will only be available during SSR, not during client side render or hydration.
+  Object.defineProperty(props, 'preloadedQuery', {
+    enumerable: false,
+    value: preloadedQuery,
   });
 
-  return {
-    ...serverSideProps,
-    __wired__server__context: context,
-  };
+  return props;
 }
 
 async function getClientInitialProps<
-  Props extends WiredProps,
+  Props extends RelayProps,
   ClientSideProps extends {}
 >(
   ctx: NextPageContext,
   query: GraphQLTaggedNode,
-  opts: WiredOptions<Props, ClientSideProps>
-) {
+  opts: RelayOptions<Props, ClientSideProps>
+): Promise<UseRelayNextJsProps> {
   const { variablesFromContext = defaultVariablesFromContext } = opts;
   const clientSideProps = opts.clientSideProps
-    ? await opts.clientSideProps(ctx)
+    ? opts.clientSideProps(ctx)
     : ({} as ClientSideProps);
 
   if ('redirect' in clientSideProps) {
     void Router.push(clientSideProps.redirect.destination);
-    return {};
+    return { CSN: true };
   }
 
   const env = opts.createClientEnvironment();
   const variables = variablesFromContext(ctx);
   const preloadedQuery = loadQuery(env, query, variables, {
-    fetchPolicy: opts.fetchPolicy || 'store-and-network',
-  });
-
-  const context = createWiredClientContext({
-    preloadedQuery,
+    fetchPolicy: 'store-and-network',
   });
 
   return {
     ...clientSideProps,
-    __wired__client__context: context,
+    CSN: true,
+    preloadedQuery,
   };
 }
 
