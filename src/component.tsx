@@ -10,7 +10,12 @@ import {
   useRef,
   useState,
 } from 'react';
-import { PreloadedQuery, loadQuery, useRelayEnvironment } from 'react-relay';
+import {
+  PreloadFetchPolicy,
+  PreloadedQuery,
+  loadQuery,
+  useRelayEnvironment,
+} from 'react-relay';
 import {
   ConcreteRequest,
   Environment,
@@ -74,6 +79,12 @@ export interface RelayOptions<
   serverSideProps?: (
     ctx: NextPageContext
   ) => Promise<OrRedirect<ServerSideProps>>;
+  fetchPolicy?: PreloadFetchPolicy;
+  /** Runs after a query has been executed on the server. */
+  serverSidePostQuery?: (
+    queryResult: GraphQLResponse | undefined,
+    ctx: NextPageContext
+  ) => Promise<unknown> | unknown;
 }
 
 function defaultVariablesFromContext(
@@ -192,12 +203,18 @@ async function getServerInitialProps<
 
   const env = await opts.createServerEnvironment(ctx, serverSideProps);
   const variables = variablesFromContext(ctx);
-  const preloadedQuery = loadQuery(env, query, variables);
+  const preloadedQuery = loadQuery(env, query, variables, {
+    fetchPolicy: opts.fetchPolicy ?? 'store-and-network',
+  });
 
   const payload = await ensureQueryFlushed(preloadedQuery);
+  await opts.serverSidePostQuery?.(payload, ctx);
+
   const payloadSerializationMetadata = collectMeta(payload);
+
+  const request = query as { default: ConcreteRequest } | ConcreteRequest;
   const operationDescriptor = createOperationDescriptor(
-    (query as unknown as { default: ConcreteRequest }).default,
+    'default' in request ? request.default : request,
     variables
   );
 
