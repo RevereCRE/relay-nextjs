@@ -34,6 +34,10 @@ Relay environment and preloaded query are created using that serialized state.
 Data is fetched using the client-side Relay environment on subsequent
 navigations.
 
+Note: `relay-nextjs` does not support [Nextjs 13 App Router](https://nextjs.org/docs/app) at the moment.
+
+- See [GitHub issue #89](https://github.com/RevereCRE/relay-nextjs/issues/89) for more info.
+
 ## Getting Started
 
 Install using npm or your other favorite package manager:

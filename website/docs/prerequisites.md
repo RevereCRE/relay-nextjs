@@ -6,7 +6,15 @@ First check out the [Relay docs](https://relay.dev) and the
 [Relay prerequisites](https://relay.dev/docs/getting-started/prerequisites/).
 Then make sure you are ready with each of the following.
 
-## A Next.js project
+## A Next.js project using [Page Router](https://nextjs.org/docs/pages)
+
+:::info
+
+`relay-nextjs` does not support [Nextjs 13 App Router](https://nextjs.org/docs/app) at the moment.
+
+See [GitHub issue #89](https://github.com/RevereCRE/relay-nextjs/issues/89) for more info.
+
+:::
 
 `relay-nextjs` is meant to integrate the Relay framework with Next.js. If you're
 not using Next.js you don't need this project. The rest of this guide will
