@@ -17,6 +17,7 @@ import {
   useRelayEnvironment,
 } from 'react-relay';
 import {
+  CacheConfig,
   ConcreteRequest,
   Environment,
   GraphQLResponse,
@@ -85,6 +86,7 @@ export interface RelayOptions<
     queryResult: GraphQLResponse | undefined,
     ctx: NextPageContext
   ) => Promise<unknown> | unknown;
+  cacheConfigFromContext?: (ctx: NextPageContext | NextRouter) => CacheConfig;
 }
 
 function defaultVariablesFromContext(
@@ -133,6 +135,7 @@ export function withRelay<Props extends RelayProps, ServerSideProps extends {}>(
 
       const nextPreloadedQuery = loadQuery(env, query, queryVariables, {
         fetchPolicy: 'store-or-network',
+        networkCacheConfig: opts.cacheConfigFromContext?.(router),
       });
 
       setPreloadedQuery(nextPreloadedQuery);
@@ -205,6 +208,7 @@ async function getServerInitialProps<
   const variables = variablesFromContext(ctx);
   const preloadedQuery = loadQuery(env, query, variables, {
     fetchPolicy: opts.fetchPolicy ?? 'store-and-network',
+    networkCacheConfig: opts.cacheConfigFromContext?.(ctx),
   });
 
   const payload = await ensureQueryFlushed(preloadedQuery);
@@ -257,6 +261,7 @@ async function getClientInitialProps<
   const variables = variablesFromContext(ctx);
   const preloadedQuery = loadQuery(env, query, variables, {
     fetchPolicy: 'store-and-network',
+    networkCacheConfig: opts.cacheConfigFromContext?.(ctx),
   });
 
   return {
