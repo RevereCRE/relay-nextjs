@@ -98,7 +98,7 @@ function defaultVariablesFromContext(
 function defaultQueryOptionsFromContext(
   _ctx: NextPageContext | NextRouter
 ): LoadQueryOptions {
-  return { fetchPolicy: 'store-and-network' };
+  return { fetchPolicy: 'store-or-network' };
 }
 
 function useStableIdentity<T>(nextValue: T): T {
@@ -119,7 +119,7 @@ export function withRelay<Props extends RelayProps, ServerSideProps extends {}>(
 ) {
   const {
     queryOptionsFromContext = defaultQueryOptionsFromContext,
-    variablesFromContext = defaultQueryOptionsFromContext,
+    variablesFromContext = defaultVariablesFromContext,
   } = opts;
 
   function useLoadedQuery(initialPreloadedQuery: Props['preloadedQuery']) {

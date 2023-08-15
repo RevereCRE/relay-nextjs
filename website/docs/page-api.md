@@ -76,7 +76,7 @@ const options: RelayOptions<{ token: string }> = {
 - `fallback?`: React component to use as a loading indicator. See
   [React Suspense docs](https://reactjs.org/docs/concurrent-mode-suspense.html).
 - `queryOptionsFromContext?`: Load query configuration. Defaults to
-  `{ fetchPolicy: 'store-and-network' }`. See
+  `{ fetchPolicy: 'store-or-network' }`. See
   [Relay docs](https://relay.dev/docs/api-reference/use-lazy-load-query/#arguments)
   for more information.
 - `clientSideProps?`: Provides props to the page on client-side navigations. Not
