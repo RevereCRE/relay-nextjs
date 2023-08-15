@@ -11,7 +11,7 @@ import {
   useState,
 } from 'react';
 import {
-  PreloadFetchPolicy,
+  LoadQueryOptions,
   PreloadedQuery,
   loadQuery,
   useRelayEnvironment,
@@ -64,6 +64,9 @@ export interface RelayOptions<
   variablesFromContext?: (
     ctx: NextPageContext | NextRouter
   ) => Props['preloadedQuery']['variables'];
+  queryOptionsFromContext?: (
+    ctx: NextPageContext | NextRouter
+  ) => LoadQueryOptions;
   /** Called when creating a Relay environment on the client. Should be idempotent. */
   createClientEnvironment: () => Environment;
   /** Props passed to the component when rendering on the client. */
@@ -79,7 +82,6 @@ export interface RelayOptions<
   serverSideProps?: (
     ctx: NextPageContext
   ) => Promise<OrRedirect<ServerSideProps>>;
-  fetchPolicy?: PreloadFetchPolicy;
   /** Runs after a query has been executed on the server. */
   serverSidePostQuery?: (
     queryResult: GraphQLResponse | undefined,
@@ -93,32 +95,43 @@ function defaultVariablesFromContext(
   return ctx.query;
 }
 
+function defaultQueryOptionsFromContext(
+  _ctx: NextPageContext | NextRouter
+): LoadQueryOptions {
+  return { fetchPolicy: 'store-and-network' };
+}
+
+function useStableIdentity<T>(nextValue: T): T {
+  const lastValue = useRef<T>(nextValue);
+  return useMemo((): T => {
+    if (!isEqual(lastValue.current, nextValue)) {
+      lastValue.current = nextValue;
+    }
+
+    return lastValue.current;
+  }, [nextValue]);
+}
+
 export function withRelay<Props extends RelayProps, ServerSideProps extends {}>(
   Component: ComponentType<Props>,
   query: GraphQLTaggedNode,
   opts: RelayOptions<Props, ServerSideProps>
 ) {
+  const {
+    queryOptionsFromContext = defaultQueryOptionsFromContext,
+    variablesFromContext = defaultQueryOptionsFromContext,
+  } = opts;
+
   function useLoadedQuery(initialPreloadedQuery: Props['preloadedQuery']) {
     const router = useRouter();
 
-    const lastQueryVariables = useRef<Variables>();
-    const queryVariables = useMemo(() => {
-      const nextQueryVariables = (
-        opts.variablesFromContext ?? defaultVariablesFromContext
-      )(router);
+    const queryOptions = useStableIdentity(
+      useMemo(() => queryOptionsFromContext(router), [router])
+    );
 
-      // In the case that the previous query variables are not deep equal to the
-      // next set of query variables update our reference. This ensures
-      // Object.is equality is maintained across renders.
-      if (
-        lastQueryVariables.current == null ||
-        !isEqual(lastQueryVariables.current, nextQueryVariables)
-      ) {
-        lastQueryVariables.current = nextQueryVariables;
-      }
-
-      return lastQueryVariables.current;
-    }, [router]);
+    const queryVariables = useStableIdentity(
+      useMemo(() => variablesFromContext(router), [router])
+    );
 
     const [preloadedQuery, setPreloadedQuery] = useState(initialPreloadedQuery);
 
@@ -131,13 +144,16 @@ export function withRelay<Props extends RelayProps, ServerSideProps extends {}>(
         return;
       }
 
-      const nextPreloadedQuery = loadQuery(env, query, queryVariables, {
-        fetchPolicy: 'store-or-network',
-      });
+      const nextPreloadedQuery = loadQuery(
+        env,
+        query,
+        queryVariables,
+        queryOptions
+      );
 
       setPreloadedQuery(nextPreloadedQuery);
       return () => nextPreloadedQuery.dispose();
-    }, [env, queryVariables]);
+    }, [env, queryVariables, queryOptions]);
 
     return preloadedQuery;
   }
@@ -177,7 +193,11 @@ async function getServerInitialProps<
   query: GraphQLTaggedNode,
   opts: RelayOptions<Props, ServerSideProps>
 ): Promise<UseRelayNextJsProps> {
-  const { variablesFromContext = defaultVariablesFromContext } = opts;
+  const {
+    variablesFromContext = defaultVariablesFromContext,
+    queryOptionsFromContext = defaultQueryOptionsFromContext,
+  } = opts;
+
   const serverSideProps = opts.serverSideProps
     ? await opts.serverSideProps(ctx)
     : ({} as ServerSideProps);
@@ -203,9 +223,8 @@ async function getServerInitialProps<
 
   const env = await opts.createServerEnvironment(ctx, serverSideProps);
   const variables = variablesFromContext(ctx);
-  const preloadedQuery = loadQuery(env, query, variables, {
-    fetchPolicy: opts.fetchPolicy ?? 'store-and-network',
-  });
+  const queryOptions = queryOptionsFromContext(ctx);
+  const preloadedQuery = loadQuery(env, query, variables, queryOptions);
 
   const payload = await ensureQueryFlushed(preloadedQuery);
   await opts.serverSidePostQuery?.(payload, ctx);
@@ -243,7 +262,11 @@ async function getClientInitialProps<
   query: GraphQLTaggedNode,
   opts: RelayOptions<Props, ClientSideProps>
 ): Promise<UseRelayNextJsProps> {
-  const { variablesFromContext = defaultVariablesFromContext } = opts;
+  const {
+    variablesFromContext = defaultVariablesFromContext,
+    queryOptionsFromContext = defaultQueryOptionsFromContext,
+  } = opts;
+
   const clientSideProps = opts.clientSideProps
     ? opts.clientSideProps(ctx)
     : ({} as ClientSideProps);
@@ -255,9 +278,8 @@ async function getClientInitialProps<
 
   const env = opts.createClientEnvironment();
   const variables = variablesFromContext(ctx);
-  const preloadedQuery = loadQuery(env, query, variables, {
-    fetchPolicy: 'store-and-network',
-  });
+  const queryOptions = queryOptionsFromContext(ctx);
+  const preloadedQuery = loadQuery(env, query, variables, queryOptions);
 
   return {
     ...clientSideProps,
