@@ -205,7 +205,7 @@ export default withRelay(UserProfile, UserProfileQuery, {
   // Create a Relay environment on the client-side.
   // Note: This function must always return the same value.
   createClientEnvironment: () => getClientEnvironment()!,
-  // variablesFromContext allows you to specify variables for the graphql query.
+  // variablesFromContext allows you to declare and customize variables for the graphql query.
   // by default variablesFromContext is ctx.query
   variablesFromContext: (ctx: NextPageContext) => ({ ...ctx.query, otherVariable: true }),
   // Gets server side props for the page.
