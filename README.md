@@ -207,7 +207,7 @@ export default withRelay(UserProfile, UserProfileQuery, {
   createClientEnvironment: () => getClientEnvironment()!,
   // variablesFromContext allows you to declare and customize variables for the graphql query.
   // by default variablesFromContext is ctx.query
-  variablesFromContext: (ctx: NextPageContext) => ({ ...ctx.query, otherVariable: true }),
+  variablesFromContext: (ctx: NextRouter | NextPageContext) => ({ ...ctx.query, otherVariable: true }),
   // Gets server side props for the page.
   serverSideProps: async (ctx) => {
     // This is an example of getting an auth token from the request context.
